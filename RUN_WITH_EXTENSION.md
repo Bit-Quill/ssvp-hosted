@@ -1,3 +1,8 @@
+<!--
+Copyright (c) 2025 Snowflake Inc. All rights reserved.
+Licensed under the MIT License.
+-->
+
 # Run the add-in from the Office Add-ins Development Kit
    
 1. Open the Office Add-ins Development Kit.

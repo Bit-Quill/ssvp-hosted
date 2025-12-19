@@ -1,3 +1,8 @@
+<!--
+Copyright (c) 2025 Snowflake Inc. All rights reserved.
+Licensed under the MIT License.
+-->
+
 # Snowflake Semantic View Excel Add-in
 
 **Author:** Yogitha Chilukuri
@@ -120,7 +125,8 @@ Did you experience any problems with the sample? [Create an issue](https://githu
 
 Want to learn more about new features and best practices for the Office platform? [Join the Microsoft Office Add-ins community call](https://learn.microsoft.com/office/dev/add-ins/overview/office-add-ins-community-call).
 
-## Copyright
+## License
 
-Copyright (c) 2024 Microsoft Corporation. All rights reserved.
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information, see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+Copyright (c) 2025 Snowflake Inc. All rights reserved.
+
+This project is licensed under the MIT License. See the LICENSE file for details.

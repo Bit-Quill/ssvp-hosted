@@ -1,55 +1,182 @@
-<!-- Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT License. -->
-<!-- This file shows how to design a first-run page that provides a welcome screen to the user about the features of the add-in. -->
-
 <!DOCTYPE html>
 <html>
-
 <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Contoso Task Pane Add-in</title>
+    <title>Snowflake Connector</title>
 
     <!-- Office JavaScript API -->
     <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
 
-    <!-- For more information on Fluent UI, visit https://developer.microsoft.com/fluentui#/. -->
+    <!-- Fluent UI -->
     <link rel="stylesheet" href="https://static2.sharepointonline.com/files/fabric/office-ui-fabric-core/11.0.0/css/fabric.min.css"/>
 
-    <!-- Template styles -->
+    <!-- Taskpane styles -->
     <link href="taskpane.css" rel="stylesheet" type="text/css" />
 </head>
 
-<body class="ms-font-m ms-welcome ms-Fabric">
-    <header class="ms-welcome__header ms-bgColor-neutralLighter">
-        <img width="90" height="90" src="../../assets/logo-filled.png" alt="Contoso" title="Contoso" />
-        <h1 class="ms-font-su">Welcome</h1>
-    </header>
-    <section id="sideload-msg" class="ms-welcome__main">
-        <h2 class="ms-font-xl">Please <a target="_blank" href="https://learn.microsoft.com/office/dev/add-ins/testing/test-debug-office-add-ins#sideload-an-office-add-in-for-testing">sideload</a> your add-in to see app body.</h2>
-    </section>
-    <main id="app-body" class="ms-welcome__main" style="display: none;">
-        <h2 class="ms-font-xl"> Discover what Office Add-ins can do for you today! </h2>
-        <ul class="ms-List ms-welcome__features">
-            <li class="ms-ListItem">
-                <i class="ms-Icon ms-Icon--Ribbon ms-font-xl"></i>
-                <span class="ms-font-m">Achieve more with Office integration</span>
-            </li>
-            <li class="ms-ListItem">
-                <i class="ms-Icon ms-Icon--Unlock ms-font-xl"></i>
-                <span class="ms-font-m">Unlock features and functionality</span>
-            </li>
-            <li class="ms-ListItem">
-                <i class="ms-Icon ms-Icon--Design ms-font-xl"></i>
-                <span class="ms-font-m">Create and visualize like a pro</span>
-            </li>
-        </ul>
-        <p class="ms-font-l">Modify the source files, then click <b>Run</b>.</p>
-        <div role="button" id="run" class="ms-welcome__action ms-Button ms-Button--hero ms-font-xl">
-            <span class="ms-Button-label">Run</span>
-        </div>
-        <p><label id="item-subject"></label></p>
-    </main>
-</body>
+<body class="ms-Fabric">
+    <div id="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">❄️</div>
+            <h1>Snowflake Connector</h1>
+            <p class="subtitle">Connect to Snowflake Semantic Views</p>
+        </header>
 
+        <!-- Connection Status -->
+        <div id="connection-status" class="status-section">
+            <div class="status-indicator" id="status-indicator">
+                <span class="status-dot disconnected" id="status-dot"></span>
+                <span id="status-text">Not connected</span>
+            </div>
+        </div>
+
+        <!-- Login Section -->
+        <section id="login-section" class="section">
+            <h2>Connect to Snowflake</h2>
+
+            <div class="form-group">
+                <label for="account-input">Snowflake Account</label>
+                <input
+                    type="text"
+                    id="account-input"
+                    class="input-field"
+                    placeholder="e.g., mycompany or xy12345"
+                />
+                <small class="help-text">
+                    Find this in your Snowflake URL:
+                    <code>https://[ACCOUNT].snowflakecomputing.com</code>
+                </small>
+            </div>
+
+            <div class="form-group">
+                <label for="client-id-input">
+                    OAuth Client ID (Optional)
+                    <span class="help-icon" title="Leave empty to use SNOWFLAKE$LOCAL_APPLICATION">?</span>
+                </label>
+                <input
+                    type="text"
+                    id="client-id-input"
+                    class="input-field"
+                    placeholder="Leave empty for default, or paste OAUTH_CLIENT_ID value"
+                />
+                <small class="help-text">
+                    Get from: <code>DESC SECURITY INTEGRATION [your_integration_name]</code> → Copy the <code>OAUTH_CLIENT_ID</code> property value (NOT the integration name!)
+                </small>
+            </div>
+
+            <div class="form-group">
+                <label for="role-input">
+                    Role (Optional)
+                    <span class="help-icon" title="Specify which role to authenticate with">?</span>
+                </label>
+                <input
+                    type="text"
+                    id="role-input"
+                    class="input-field"
+                    placeholder="e.g., USERADMIN, SYSADMIN, PUBLIC"
+                />
+                <small class="help-text">
+                    ⚠️ Leave empty for your default role. <strong>Note: Role cannot be changed after authentication without reconnecting.</strong>
+                </small>
+            </div>
+
+            <button id="btn-connect" class="primary-button">
+                <span id="btn-connect-text">Connect with Snowflake</span>
+            </button>
+        </section>
+
+        <!-- Connected Section -->
+        <section id="connected-section" class="section" style="display: none;">
+            <h2>✓ Connected to Snowflake</h2>
+
+            <div class="info-card">
+                <div class="info-row">
+                    <span class="label">Account:</span>
+                    <span class="value" id="connected-account">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Current Role:</span>
+                    <span class="value" id="connected-role">-</span>
+                </div>
+            </div>
+
+            <!-- Warehouse Selection -->
+            <div class="form-group">
+                <label for="warehouse-select">Warehouse</label>
+                <select id="warehouse-select" class="input-field">
+                    <option value="">Loading warehouses...</option>
+                </select>
+            </div>
+
+            <!-- Role Selection (allows changing via re-authentication) -->
+            <div class="form-group">
+                <label for="role-select">
+                    Change Role
+                    <span class="help-icon" title="Selecting a different role will trigger re-authentication">?</span>
+                </label>
+                <select id="role-select" class="input-field">
+                    <option value="">Loading roles...</option>
+                </select>
+                <small class="help-text">
+                    💡 Selecting a different role will automatically re-authenticate with that role.
+                </small>
+            </div>
+
+            <button id="btn-set-context" class="primary-button">
+                Set Warehouse
+            </button>
+
+            <button id="btn-change-role" class="secondary-button" style="display: none; margin-top: 8px;">
+                Change Role & Re-authenticate
+            </button>
+
+            <div class="info-card" id="current-context" style="display: none; margin-top: 16px;">
+                <div class="info-row">
+                    <span class="label">Current Warehouse:</span>
+                    <span class="value" id="current-warehouse">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="label">Current Role:</span>
+                    <span class="value" id="current-role">-</span>
+                </div>
+            </div>
+
+            <button id="btn-disconnect" class="secondary-button" style="margin-top: 16px;">
+                Disconnect
+            </button>
+
+            <div class="success-message">
+                <p>🎉 You're ready to query Semantic Views!</p>
+                <small>(Feature coming soon)</small>
+            </div>
+        </section>
+
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="overlay" style="display: none;">
+            <div class="spinner"></div>
+            <p id="loading-text">Connecting to Snowflake...</p>
+        </div>
+
+        <!-- Error Message -->
+        <div id="error-message" class="error-toast" style="display: none;">
+            <span id="error-text"></span>
+            <button id="error-close" class="close-btn">×</button>
+        </div>
+
+        <!-- Debug Console (Development Only) -->
+        <div id="debug-console" class="debug-console">
+            <details open>
+                <summary>🔍 Debug Console (Click to collapse)</summary>
+                <pre id="debug-output"></pre>
+                <button id="clear-debug" class="small-button">Clear</button>
+            </details>
+        </div>
+    </div>
+
+    <!-- Import taskpane JavaScript -->
+    <script src="taskpane.js"></script>
+</body>
 </html>

@@ -25,6 +25,15 @@
             <p class="subtitle">Connect to Snowflake Semantic Views</p>
         </header>
 
+        <!-- Debug Console -->
+        <div id="debug-console" class="debug-console" style="margin-bottom: 16px;">
+            <details open>
+                <summary>🔍 Debug Logs</summary>
+                <pre id="debug-output" style="max-height: 200px; overflow-y: auto; font-size: 11px; background: #f5f5f5; padding: 8px; border-radius: 4px;"></pre>
+                <button id="clear-debug" class="small-button" style="margin-top: 4px; padding: 4px 8px; font-size: 11px;">Clear</button>
+            </details>
+        </div>
+
         <!-- Connection Status -->
         <div id="connection-status" class="status-section">
             <div class="status-indicator" id="status-indicator">
@@ -111,26 +120,22 @@
                 </select>
             </div>
 
-            <!-- Role Selection (allows changing via re-authentication) -->
+            <!-- Role Selection -->
             <div class="form-group">
                 <label for="role-select">
-                    Change Role
-                    <span class="help-icon" title="Selecting a different role will trigger re-authentication">?</span>
+                    Role
+                    <span class="help-icon" title="Change role using in-session switching">?</span>
                 </label>
                 <select id="role-select" class="input-field">
                     <option value="">Loading roles...</option>
                 </select>
                 <small class="help-text">
-                    💡 Selecting a different role will automatically re-authenticate with that role.
+                    💡 Change warehouse and/or role, then click Update Context below.
                 </small>
             </div>
 
-            <button id="btn-set-context" class="primary-button">
-                Set Warehouse
-            </button>
-
-            <button id="btn-change-role" class="secondary-button" style="display: none; margin-top: 8px;">
-                Change Role & Re-authenticate
+            <button id="btn-update-context" class="primary-button">
+                Update Context
             </button>
 
             <div class="info-card" id="current-context" style="display: none; margin-top: 16px;">
@@ -164,15 +169,6 @@
         <div id="error-message" class="error-toast" style="display: none;">
             <span id="error-text"></span>
             <button id="error-close" class="close-btn">×</button>
-        </div>
-
-        <!-- Debug Console (Development Only) -->
-        <div id="debug-console" class="debug-console">
-            <details open>
-                <summary>🔍 Debug Console (Click to collapse)</summary>
-                <pre id="debug-output"></pre>
-                <button id="clear-debug" class="small-button">Clear</button>
-            </details>
         </div>
     </div>
 

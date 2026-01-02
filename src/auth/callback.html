@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Snowflake OAuth Callback</title>
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
   <style>
     * {
       margin: 0;
@@ -140,6 +141,10 @@
       <p style="margin-top: 1rem; font-size: 14px; opacity: 0.8;">
         This window will close automatically...
       </p>
+      <p id="office-status" style="margin-top: 1rem; font-size: 12px; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 4px;"></p>
+      <button onclick="window.close()" style="margin-top: 1rem; padding: 8px 16px; background: white; color: #1E88E5; border: none; border-radius: 4px; cursor: pointer;">
+        Close Window Manually
+      </button>
     </div>
 
     <div id="error-container" class="error">
@@ -155,7 +160,33 @@
   </div>
 
   <script>
-    (function() {
+    // Wait for Office.js to initialize before handling callback
+    let callbackExecuted = false;
+
+    if (typeof Office !== 'undefined') {
+      Office.onReady(() => {
+        console.log('✅ Office.js ready in callback page');
+        if (!callbackExecuted) {
+          callbackExecuted = true;
+          handleOAuthCallback();
+        }
+      });
+
+      // Fallback: if Office.onReady doesn't fire within 2 seconds, run anyway
+      setTimeout(() => {
+        if (!callbackExecuted) {
+          console.log('⚠️ Office.onReady timeout, running callback anyway');
+          callbackExecuted = true;
+          handleOAuthCallback();
+        }
+      }, 2000);
+    } else {
+      // Not in Office context, run immediately
+      console.log('🔵 No Office context, running callback immediately');
+      handleOAuthCallback();
+    }
+
+    function handleOAuthCallback() {
       'use strict';
 
       const urlParams = new URLSearchParams(window.location.search);
@@ -187,16 +218,53 @@
       }
 
       function sendMessageToOpener(data) {
-        if (!window.opener || window.opener.closed) {
-          showError(
-            'Window Closed',
-            'The Excel add-in window was closed. Please try connecting again.'
-          );
-          return false;
+        const statusEl = document.getElementById('office-status');
+
+        // Check if we're in an Office Dialog
+        if (typeof Office !== 'undefined' && Office.context && Office.context.ui) {
+          try {
+            // Use Office Dialog API
+            Office.context.ui.messageParent(JSON.stringify(data));
+            console.log('✅ Message sent via Office Dialog API');
+            if (statusEl) statusEl.textContent = '✅ Sent via Office Dialog API';
+            return true;
+          } catch (err) {
+            console.error('Office Dialog API error:', err);
+            if (statusEl) statusEl.textContent = '❌ Office Dialog API error: ' + err.message;
+            // Fall through to other methods
+          }
+        } else {
+          const officeAvailable = typeof Office !== 'undefined';
+          const contextAvailable = officeAvailable && Office.context;
+          const uiAvailable = contextAvailable && Office.context.ui;
+          if (statusEl) {
+            statusEl.textContent = `Office: ${officeAvailable}, context: ${contextAvailable}, ui: ${uiAvailable}`;
+          }
         }
 
+        // Try window.opener (for regular popups)
+        if (window.opener && !window.opener.closed) {
+          try {
+            // Send to task pane origin (https://localhost:3000)
+            window.opener.postMessage(data, 'https://localhost:3000');
+            console.log('✅ Message sent via window.opener to https://localhost:3000');
+
+            // Also try wildcard in case origin is different
+            window.opener.postMessage(data, '*');
+            console.log('✅ Message also sent to wildcard origin');
+
+            if (statusEl) statusEl.textContent = '✅ Message sent to opener';
+            return true;
+          } catch (err) {
+            console.error('window.opener error:', err);
+            if (statusEl) statusEl.textContent = '❌ window.opener error: ' + err.message;
+          }
+        }
+
+        // Fallback: localStorage (for manual browser flow)
         try {
-          window.opener.postMessage(data, window.location.origin);
+          localStorage.setItem('snowflake_oauth_result', JSON.stringify(data));
+          console.log('✅ Stored in localStorage');
           return true;
         } catch (err) {
           showError(
@@ -267,7 +335,39 @@
 
       try {
         if (window.opener && !window.opener.closed) {
+          // Normal popup flow
           handleCallback();
+        } else if (code && state) {
+          // Manual browser flow - no opener available
+          // Try to communicate via localStorage as fallback
+          try {
+            const authResult = {
+              type: 'SNOWFLAKE_AUTH_SUCCESS',
+              code: code,
+              state: state,
+              timestamp: Date.now()
+            };
+
+            // Store in localStorage for the task pane to pick up
+            localStorage.setItem('snowflake_oauth_result', JSON.stringify(authResult));
+
+            showSuccess();
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('success-state').style.display = 'block';
+
+            // Auto-close after delay
+            setTimeout(() => {
+              window.close();
+            }, 3000);
+          } catch (storageErr) {
+            console.error('localStorage error:', storageErr);
+
+            // If localStorage fails, show the code to user
+            showError(
+              'Authentication Successful',
+              'Copy this code and paste it in Excel:\n\nCode: ' + code + '\nState: ' + state
+            );
+          }
         } else {
           showError(
             'Invalid Access',
@@ -281,7 +381,7 @@
           'An unexpected error occurred: ' + (err.message || 'Unknown error')
         );
       }
-    })();
+    }
   </script>
 </body>
 </html>

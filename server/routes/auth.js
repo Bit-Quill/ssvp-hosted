@@ -50,6 +50,11 @@ router.post('/token', async (req, res) => {
       client_id: client_id
     });
 
+    // For LOCAL_APPLICATION, add client_secret per Snowflake docs
+    if (client_id === 'LOCAL_APPLICATION') {
+      tokenParams.append('client_secret', 'LOCAL_APPLICATION');
+    }
+
     const fetch = (await import('node-fetch')).default;
     const response = await fetch(tokenUrl, {
       method: 'POST',
@@ -73,14 +78,6 @@ router.post('/token', async (req, res) => {
     }
 
     if (!response.ok) {
-      console.error('[Auth Proxy] Snowflake token exchange failed:', {
-        status: response.status,
-        error: tokenData.error,
-        error_description: tokenData.error_description,
-        account: account,
-        tokenUrl: tokenUrl
-      });
-
       return res.status(response.status).json({
         success: false,
         message: tokenData.error_description || tokenData.error || 'Token exchange failed',
@@ -116,7 +113,7 @@ router.post('/token', async (req, res) => {
 
 router.post('/refresh', async (req, res) => {
   try {
-    const { refresh_token, account } = req.body;
+    const { refresh_token, account, client_id, client_secret } = req.body;
 
     if (!refresh_token) {
       return res.status(400).json({
@@ -132,13 +129,14 @@ router.post('/refresh', async (req, res) => {
       });
     }
 
-    const clientId = process.env.SNOWFLAKE_OAUTH_CLIENT_ID;
-    const clientSecret = process.env.SNOWFLAKE_OAUTH_CLIENT_SECRET;
+    // Use provided client_id or fall back to environment variables
+    const finalClientId = client_id || process.env.SNOWFLAKE_OAUTH_CLIENT_ID;
+    const finalClientSecret = client_secret || process.env.SNOWFLAKE_OAUTH_CLIENT_SECRET;
 
-    if (!clientId || !clientSecret) {
-      return res.status(500).json({
+    if (!finalClientId) {
+      return res.status(400).json({
         success: false,
-        message: 'OAuth credentials not configured on server'
+        message: 'Missing client ID'
       });
     }
 
@@ -147,9 +145,15 @@ router.post('/refresh', async (req, res) => {
     const tokenParams = new URLSearchParams({
       grant_type: 'refresh_token',
       refresh_token: refresh_token,
-      client_id: clientId,
-      client_secret: clientSecret
+      client_id: finalClientId
     });
+
+    // For LOCAL_APPLICATION, always add client_secret per Snowflake docs
+    if (finalClientId === 'LOCAL_APPLICATION') {
+      tokenParams.append('client_secret', 'LOCAL_APPLICATION');
+    } else if (finalClientSecret) {
+      tokenParams.append('client_secret', finalClientSecret);
+    }
 
     const fetch = (await import('node-fetch')).default;
     const response = await fetch(tokenUrl, {
@@ -243,7 +247,7 @@ router.post('/revoke', async (req, res) => {
     });
 
     const fetch = (await import('node-fetch')).default;
-    const response = await fetch(revokeUrl, {
+    await fetch(revokeUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -251,10 +255,6 @@ router.post('/revoke', async (req, res) => {
       },
       body: revokeParams.toString()
     });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-    }
 
     res.json({
       success: true,

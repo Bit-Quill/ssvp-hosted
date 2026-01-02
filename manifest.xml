@@ -11,6 +11,9 @@
   <SupportUrl DefaultValue="https://www.contoso.com/help"/>
   <AppDomains>
     <AppDomain>https://www.contoso.com</AppDomain>
+    <AppDomain>https://*.snowflakecomputing.com</AppDomain>
+    <AppDomain>https://NOC31872.snowflakecomputing.com</AppDomain>
+    <AppDomain>http://127.0.0.1</AppDomain>
   </AppDomains>
   <Hosts>
     <Host Name="Workbook"/>

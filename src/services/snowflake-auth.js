@@ -10,7 +10,7 @@ const SnowflakeAuth = {
     clientId: null,
     clientSecret: null,
     integrationName: null,
-    redirectUri: 'https://localhost:3000/auth/callback',
+    redirectUri: null, // Will be set dynamically based on clientId
     scopes: ['refresh_token']
   },
 
@@ -30,6 +30,127 @@ const SnowflakeAuth = {
     if (!this.config.clientId) {
       this.config.clientId = 'LOCAL_APPLICATION';
       this.config.integrationName = 'SNOWFLAKE$LOCAL_APPLICATION';
+      this.config.redirectUri = 'http://127.0.0.1';
+    } else {
+      if (!this.config.redirectUri) {
+        this.config.redirectUri = 'http://127.0.0.1:3000/auth/callback';
+      }
+    }
+  },
+
+  async loginWithOAuthDialog() {
+    try {
+      const codeVerifier = PKCEHelper.generateCodeVerifier();
+      const codeChallenge = await PKCEHelper.generateCodeChallenge(codeVerifier);
+      const state = PKCEHelper.generateState();
+
+      PKCEHelper.storePKCEParams(codeVerifier, state);
+
+      const authUrl = this.buildOAuthUrl(codeChallenge, state);
+      const dialogUrl = `${window.location.origin}/auth/auth-start.html?authUrl=${encodeURIComponent(authUrl)}`;
+
+      return new Promise((resolve, reject) => {
+        Office.context.ui.displayDialogAsync(
+          dialogUrl,
+          { height: 60, width: 30, displayInIframe: false },
+          (asyncResult) => {
+            if (asyncResult.status === Office.AsyncResultStatus.Failed) {
+              PKCEHelper.clearPKCEParams();
+              return reject(new Error(`Failed to open dialog: ${asyncResult.error.message}`));
+            }
+
+            const dialog = asyncResult.value;
+
+            dialog.addEventHandler(Office.EventType.DialogMessageReceived, async (arg) => {
+              dialog.close();
+
+              try {
+                const messageData = JSON.parse(arg.message);
+
+                if (messageData.type === 'SNOWFLAKE_AUTH_SUCCESS') {
+                  if (!PKCEHelper.validateState(messageData.state)) {
+                    PKCEHelper.clearPKCEParams();
+                    return reject(new Error('Invalid state parameter - possible CSRF attack'));
+                  }
+
+                  const tokens = await this.exchangeCodeForTokens(messageData.code, codeVerifier);
+
+                  this.accessToken = tokens.access_token;
+                  this.refreshToken = tokens.refresh_token;
+                  this.tokenExpiry = Date.now() + (tokens.expires_in * 1000);
+                  this.authMethod = 'oauth';
+
+                  PKCEHelper.clearPKCEParams();
+
+                  resolve({
+                    success: true,
+                    token: this.accessToken,
+                    expiresIn: tokens.expires_in
+                  });
+                } else if (messageData.type === 'SNOWFLAKE_AUTH_ERROR') {
+                  PKCEHelper.clearPKCEParams();
+                  reject(new Error(messageData.error || 'Authentication failed'));
+                }
+              } catch (error) {
+                PKCEHelper.clearPKCEParams();
+                reject(error);
+              }
+            });
+
+            const pollInterval = setInterval(() => {
+              try {
+                const result = localStorage.getItem('snowflake_oauth_result');
+                if (result) {
+                  clearInterval(pollInterval);
+                  localStorage.removeItem('snowflake_oauth_result');
+                  dialog.close();
+
+                  const authData = JSON.parse(result);
+
+                  if (!PKCEHelper.validateState(authData.state)) {
+                    PKCEHelper.clearPKCEParams();
+                    return reject(new Error('Invalid state parameter'));
+                  }
+
+                  this.exchangeCodeForTokens(authData.code, codeVerifier)
+                    .then(tokens => {
+                      this.accessToken = tokens.access_token;
+                      this.refreshToken = tokens.refresh_token;
+                      this.tokenExpiry = Date.now() + (tokens.expires_in * 1000);
+                      this.authMethod = 'oauth';
+
+                      PKCEHelper.clearPKCEParams();
+
+                      resolve({
+                        success: true,
+                        token: this.accessToken,
+                        expiresIn: tokens.expires_in
+                      });
+                    })
+                    .catch(error => {
+                      PKCEHelper.clearPKCEParams();
+                      reject(error);
+                    });
+                }
+              } catch (error) {
+                console.error('localStorage polling error:', error);
+              }
+            }, 1000);
+
+            dialog.addEventHandler(Office.EventType.DialogEventReceived, (arg) => {
+              clearInterval(pollInterval);
+              if (arg.error === 12006) {
+                PKCEHelper.clearPKCEParams();
+                reject(new Error('Authentication cancelled'));
+              }
+            });
+          }
+        );
+      });
+    } catch (error) {
+      PKCEHelper.clearPKCEParams();
+      this.logout();
+      throw new Error(`OAuth login failed: ${error.message}`);
     }
   },
 
@@ -116,14 +237,64 @@ const SnowflakeAuth = {
     return this.authWindow;
   },
 
+  waitForManualAuth() {
+    return new Promise((resolve, reject) => {
+      const startTime = Date.now();
+      const timeout = 600000;
+
+      const pollInterval = setInterval(() => {
+        try {
+          const result = localStorage.getItem('snowflake_oauth_result');
+
+          if (result) {
+            clearInterval(pollInterval);
+
+            const authData = JSON.parse(result);
+            localStorage.removeItem('snowflake_oauth_result');
+
+            if (!PKCEHelper.validateState(authData.state)) {
+              PKCEHelper.clearPKCEParams();
+              return reject(new Error('Invalid state parameter - possible CSRF attack'));
+            }
+
+            this.exchangeCodeForTokens(authData.code, PKCEHelper.retrieveCodeVerifier())
+              .then(tokens => {
+                this.accessToken = tokens.access_token;
+                this.refreshToken = tokens.refresh_token;
+                this.tokenExpiry = Date.now() + (tokens.expires_in * 1000);
+                this.authMethod = 'oauth';
+
+                PKCEHelper.clearPKCEParams();
+
+                resolve({
+                  success: true,
+                  token: this.accessToken,
+                  expiresIn: tokens.expires_in
+                });
+              })
+              .catch(error => {
+                PKCEHelper.clearPKCEParams();
+                reject(error);
+              });
+          }
+
+          if (Date.now() - startTime > timeout) {
+            clearInterval(pollInterval);
+            PKCEHelper.clearPKCEParams();
+            reject(new Error('Authentication timeout - please try again'));
+          }
+        } catch (error) {
+          clearInterval(pollInterval);
+          PKCEHelper.clearPKCEParams();
+          reject(error);
+        }
+      }, 1000);
+    });
+  },
+
   waitForAuthCallback(authWindow) {
     return new Promise((resolve, reject) => {
       const messageHandler = (event) => {
-        const expectedOrigin = window.location.origin;
-        if (event.origin !== expectedOrigin) {
-          return;
-        }
-
         if (event.data.type === 'SNOWFLAKE_AUTH_SUCCESS') {
           window.removeEventListener('message', messageHandler);
           clearInterval(checkWindowClosed);
@@ -157,6 +328,20 @@ const SnowflakeAuth = {
           clearInterval(checkWindowClosed);
           clearTimeout(timeoutId);
           window.removeEventListener('message', messageHandler);
+
+          try {
+            const result = localStorage.getItem('snowflake_oauth_result');
+            if (result) {
+              localStorage.removeItem('snowflake_oauth_result');
+              const authData = JSON.parse(result);
+              return resolve({
+                code: authData.code,
+                state: authData.state
+              });
+            }
+          } catch (err) {
+          }
+
           reject(new Error('Authentication window was closed'));
         }
       }, 1000);
@@ -214,12 +399,6 @@ const SnowflakeAuth = {
 
       return result;
     } catch (error) {
-      console.error('[SnowflakeAuth] Token exchange error:', {
-        error: error.message,
-        account: this.config.account,
-        clientId: this.config.clientId,
-        redirectUri: this.config.redirectUri
-      });
       throw new Error(`Token exchange failed: ${error.message}`);
     }
   },
@@ -237,7 +416,9 @@ const SnowflakeAuth = {
         },
         body: JSON.stringify({
           refresh_token: this.refreshToken,
-          account: this.config.account
+          account: this.config.account,
+          client_id: this.config.clientId,
+          client_secret: this.config.clientId === 'LOCAL_APPLICATION' ? 'LOCAL_APPLICATION' : this.config.clientSecret
         })
       });
 

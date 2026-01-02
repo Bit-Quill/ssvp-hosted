@@ -59,7 +59,6 @@ const PKCEHelper = {
       sessionStorage.removeItem('pkce_code_verifier');
       sessionStorage.removeItem('pkce_state');
     } catch (error) {
-      // Silently fail
     }
   },
 

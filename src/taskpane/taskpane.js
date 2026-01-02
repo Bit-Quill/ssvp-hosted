@@ -10,47 +10,22 @@ const state = {
   availableRoles: []
 };
 
-function debugLog(message, data = null) {
-  const debugOutput = document.getElementById('debug-output');
-  if (debugOutput) {
-    const timestamp = new Date().toLocaleTimeString();
-    const logEntry = `[${timestamp}] ${message}${data ? '\n' + JSON.stringify(data, null, 2) : ''}\n`;
-    debugOutput.textContent += logEntry;
-    debugOutput.scrollTop = debugOutput.scrollHeight;
-  }
-}
-
 Office.onReady((info) => {
-  debugLog('Office.js initialized', { host: info.host, platform: info.platform });
-
   if (info.host === Office.HostType.Excel) {
-    initializeApp();
+    bindEvents();
+    checkExistingSession();
   } else {
     showError('This add-in requires Excel');
   }
 });
 
-function initializeApp() {
-  bindEvents();
-  checkExistingSession();
-}
-
 function bindEvents() {
   document.getElementById('btn-connect').addEventListener('click', handleConnect);
   document.getElementById('btn-disconnect').addEventListener('click', handleDisconnect);
-  document.getElementById('btn-set-context').addEventListener('click', handleSetContext);
-  document.getElementById('btn-change-role').addEventListener('click', handleChangeRole);
-  document.getElementById('role-select').addEventListener('change', handleRoleSelectChange);
-
+  document.getElementById('btn-update-context').addEventListener('click', handleUpdateContext);
   document.getElementById('error-close').addEventListener('click', () => {
     document.getElementById('error-message').style.display = 'none';
   });
-
-  document.getElementById('clear-debug').addEventListener('click', () => {
-    document.getElementById('debug-output').textContent = '';
-  });
-
-  debugLog('Event listeners bound');
 }
 
 function checkExistingSession() {
@@ -71,25 +46,21 @@ async function handleConnect() {
     return;
   }
 
-  debugLog('Starting connection', { account, clientId, role });
-
   try {
     showLoading('Initializing authentication...');
 
     const initConfig = { account };
-
     if (clientId) {
       initConfig.clientId = clientId;
       initConfig.integrationName = 'Custom OAuth Integration';
     }
-
     if (role) {
       initConfig.role = role;
     }
 
     SnowflakeAuth.init(initConfig);
-
     showLoading('Opening Snowflake login...');
+
     const result = await SnowflakeAuth.loginWithOAuth();
 
     state.connected = true;
@@ -100,7 +71,6 @@ async function handleConnect() {
     await loadWarehousesAndRoles();
 
   } catch (error) {
-    debugLog('Login failed', { error: error.message });
     hideLoading();
 
     if (error.message.includes('popup') || error.message.includes('authorization window')) {
@@ -248,6 +218,34 @@ function showSuccess(message) {
   }, 3000);
 }
 
+function showManualAuthInstructions(authUrl) {
+  hideLoading();
+
+  const errorDiv = document.getElementById('error-message');
+  const errorText = document.getElementById('error-text');
+
+  errorText.innerHTML = `
+    <strong>🔐 Complete Authentication in Your Browser</strong><br><br>
+    <p style="margin-bottom: 12px;">Click the button below to open Snowflake login in your default browser:</p>
+    <button id="open-browser-btn" class="primary-button" style="width: 100%; margin-bottom: 8px;">
+      Open in Browser
+    </button>
+    <br>
+    <small style="opacity: 0.8;">After you sign in, the window will close automatically and you'll be connected.</small>
+    <br><br>
+    <details style="margin-top: 8px;">
+      <summary style="cursor: pointer; opacity: 0.7;">Or copy URL manually</summary>
+      <textarea readonly style="width: 100%; height: 60px; margin: 8px 0; padding: 8px; font-size: 10px; font-family: monospace;">${authUrl}</textarea>
+    </details>
+  `;
+  errorDiv.style.display = 'flex';
+  errorDiv.style.background = '#2196F3';
+
+  document.getElementById('open-browser-btn').addEventListener('click', () => {
+    window.open(authUrl, '_blank');
+  });
+}
+
 function handleDisconnect() {
   try {
     SnowflakeAuth.logout();
@@ -298,9 +296,12 @@ function showError(message) {
 
   errorText.textContent = message;
   errorDiv.style.display = 'flex';
+  errorDiv.style.background = '#dc3545';
+  errorDiv.style.color = 'white';
 
   setTimeout(() => {
     errorDiv.style.display = 'none';
+    errorDiv.style.background = '';
   }, 10000);
 }
 
@@ -359,99 +360,76 @@ function displayCurrentRole(role) {
   roleElement.textContent = role || '-';
 }
 
-async function handleSetContext() {
-  const warehouse = document.getElementById('warehouse-select').value;
+async function handleUpdateContext() {
+  const newWarehouse = document.getElementById('warehouse-select').value;
+  const newRole = document.getElementById('role-select').value;
 
-  if (!warehouse) {
-    showError('Please select a warehouse');
+  if (!newWarehouse && !newRole) {
+    showError('Please select a warehouse and/or role');
     return;
   }
 
   try {
-    showLoading('Setting warehouse...');
+    const warehouseChanging = newWarehouse && newWarehouse !== state.warehouse;
+    const roleChanging = newRole && newRole !== state.role;
 
-    SnowflakeAuth.setContext(warehouse, null);
+    if (!warehouseChanging && !roleChanging) {
+      showError('No changes detected. Select a different warehouse or role.');
+      return;
+    }
 
-    const testResult = await SnowflakeAuth.executeStatement(
+    const changes = [];
+    if (warehouseChanging) changes.push(`warehouse to ${newWarehouse}`);
+    if (roleChanging) changes.push(`role to ${newRole}`);
+    showLoading(`Updating ${changes.join(' and ')}...`);
+
+    SnowflakeAuth.setContext(
+      warehouseChanging ? newWarehouse : null,
+      roleChanging ? newRole : null
+    );
+
+    const result = await SnowflakeAuth.executeStatement(
       'SELECT CURRENT_WAREHOUSE() AS WH, CURRENT_ROLE() AS ROLE'
     );
 
-    state.warehouse = warehouse;
+    const verifiedWarehouse = result.data[0][0];
+    const verifiedRole = result.data[0][1];
 
-    document.getElementById('current-warehouse').textContent = warehouse;
+    if (warehouseChanging && verifiedWarehouse !== newWarehouse) {
+      SnowflakeAuth.setContext(state.warehouse, state.role);
+      throw new Error(`Warehouse change failed. Expected ${newWarehouse}, got ${verifiedWarehouse}`);
+    }
+
+    if (roleChanging && verifiedRole !== newRole) {
+      SnowflakeAuth.setContext(state.warehouse, state.role);
+      throw new Error(`Role change failed. Expected ${newRole}, got ${verifiedRole}`);
+    }
+
+    if (warehouseChanging) state.warehouse = newWarehouse;
+    if (roleChanging) state.role = newRole;
+
+    document.getElementById('connected-role').textContent = state.role || '-';
+    document.getElementById('current-warehouse').textContent = state.warehouse || '-';
     document.getElementById('current-role').textContent = state.role || '-';
     document.getElementById('current-context').style.display = 'block';
 
     hideLoading();
+    showSuccess(`✅ Updated ${changes.join(' and ')} successfully!`);
+
+    if (roleChanging) {
+      await loadWarehousesAndRoles();
+    }
 
   } catch (error) {
     hideLoading();
-    showError(`Failed to set warehouse: ${error.message}`);
-  }
-}
+    showError(`Failed to update context: ${error.message}`);
 
-function handleRoleSelectChange() {
-  const selectedRole = document.getElementById('role-select').value;
-  const currentRole = state.role;
-  const changeRoleButton = document.getElementById('btn-change-role');
-
-  if (selectedRole && selectedRole !== currentRole) {
-    changeRoleButton.style.display = 'block';
-  } else {
-    changeRoleButton.style.display = 'none';
-  }
-}
-
-async function handleChangeRole() {
-  const newRole = document.getElementById('role-select').value;
-
-  if (!newRole) {
-    showError('Please select a role');
-    return;
-  }
-
-  try {
-    showLoading('Re-authenticating with new role...');
-
-    const account = state.account;
-    const clientId = SnowflakeAuth.config.clientId;
-
-    SnowflakeAuth.logout();
-
-    const initConfig = {
-      account: account,
-      role: newRole
-    };
-
-    if (clientId && clientId !== 'LOCAL_APPLICATION') {
-      initConfig.clientId = clientId;
-      initConfig.integrationName = 'Custom OAuth Integration';
+    if (state.warehouse) {
+      document.getElementById('warehouse-select').value = state.warehouse;
     }
-
-    SnowflakeAuth.init(initConfig);
-
-    showLoading('Opening Snowflake login...');
-
-    const result = await SnowflakeAuth.loginWithOAuth();
-
-    state.connected = true;
-    state.account = account;
-    state.role = newRole;
-
-    hideLoading();
-    await loadWarehousesAndRoles();
-
-  } catch (error) {
-    hideLoading();
-
-    if (error.message.includes('popup') || error.message.includes('authorization window')) {
-      showPopupBlockedMessage();
-    } else {
-      showError(`Failed to change role: ${error.message}`);
+    if (state.role) {
+      document.getElementById('role-select').value = state.role;
     }
-
-    document.getElementById('role-select').value = state.role;
-    document.getElementById('btn-change-role').style.display = 'none';
   }
 }
 

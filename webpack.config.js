@@ -95,6 +95,11 @@ module.exports = async (env, options) => {
         devServer.app.use(express.json());
         devServer.app.use(express.urlencoded({ extended: true }));
 
+        // OAuth auth start route
+        devServer.app.get('/auth/auth-start.html', (req, res) => {
+          res.sendFile(path.join(__dirname, 'src/auth/auth-start.html'));
+        });
+
         // OAuth callback route
         devServer.app.get('/auth/callback', (req, res) => {
           // Serve the callback HTML page

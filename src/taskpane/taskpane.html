@@ -1,48 +1,30 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Snowflake Connector</title>
 
-    <!-- Office JavaScript API -->
     <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
-
-    <!-- Fluent UI -->
     <link rel="stylesheet" href="https://static2.sharepointonline.com/files/fabric/office-ui-fabric-core/11.0.0/css/fabric.min.css"/>
-
-    <!-- Taskpane styles -->
     <link href="taskpane.css" rel="stylesheet" type="text/css" />
 </head>
 
 <body class="ms-Fabric">
     <div id="app">
-        <!-- Header -->
-        <header class="header">
+        <header class="header compact-header">
             <div class="logo">❄️</div>
             <h1>Snowflake Connector</h1>
-            <p class="subtitle">Connect to Snowflake Semantic Views</p>
         </header>
 
-        <!-- Debug Console -->
-        <div id="debug-console" class="debug-console" style="margin-bottom: 16px;">
-            <details open>
-                <summary>🔍 Debug Logs</summary>
-                <pre id="debug-output" style="max-height: 200px; overflow-y: auto; font-size: 11px; background: #f5f5f5; padding: 8px; border-radius: 4px;"></pre>
-                <button id="clear-debug" class="small-button" style="margin-top: 4px; padding: 4px 8px; font-size: 11px;">Clear</button>
-            </details>
-        </div>
-
-        <!-- Connection Status -->
         <div id="connection-status" class="status-section">
-            <div class="status-indicator" id="status-indicator">
+            <div class="status-indicator">
                 <span class="status-dot disconnected" id="status-dot"></span>
                 <span id="status-text">Not connected</span>
             </div>
         </div>
 
-        <!-- Login Section -->
         <section id="login-section" class="section">
             <h2>Connect to Snowflake</h2>
 
@@ -60,119 +42,184 @@
                 </small>
             </div>
 
-            <div class="form-group">
-                <label for="client-id-input">
-                    OAuth Client ID (Optional)
-                    <span class="help-icon" title="Leave empty to use SNOWFLAKE$LOCAL_APPLICATION">?</span>
-                </label>
-                <input
-                    type="text"
-                    id="client-id-input"
-                    class="input-field"
-                    placeholder="Leave empty for default, or paste OAUTH_CLIENT_ID value"
-                />
-                <small class="help-text">
-                    Get from: <code>DESC SECURITY INTEGRATION [your_integration_name]</code> → Copy the <code>OAUTH_CLIENT_ID</code> property value (NOT the integration name!)
-                </small>
-            </div>
-
-            <div class="form-group">
-                <label for="role-input">
-                    Role (Optional)
-                    <span class="help-icon" title="Specify which role to authenticate with">?</span>
-                </label>
-                <input
-                    type="text"
-                    id="role-input"
-                    class="input-field"
-                    placeholder="e.g., USERADMIN, SYSADMIN, PUBLIC"
-                />
-                <small class="help-text">
-                    ⚠️ Leave empty for your default role. <strong>Note: Role cannot be changed after authentication without reconnecting.</strong>
-                </small>
-            </div>
-
-            <button id="btn-connect" class="primary-button">
+            <button type="button" id="btn-connect" class="primary-button">
                 <span id="btn-connect-text">Connect with Snowflake</span>
             </button>
         </section>
 
-        <!-- Connected Section -->
-        <section id="connected-section" class="section" style="display: none;">
-            <h2>✓ Connected to Snowflake</h2>
+        <section id="role-warehouse-selection-section" class="section hidden">
+            <h2>Select Role & Warehouse</h2>
 
-            <div class="info-card">
-                <div class="info-row">
-                    <span class="label">Account:</span>
-                    <span class="value" id="connected-account">-</span>
-                </div>
-                <div class="info-row">
-                    <span class="label">Current Role:</span>
-                    <span class="value" id="connected-role">-</span>
-                </div>
-            </div>
-
-            <!-- Warehouse Selection -->
             <div class="form-group">
-                <label for="warehouse-select">Warehouse</label>
-                <select id="warehouse-select" class="input-field">
-                    <option value="">Loading warehouses...</option>
-                </select>
-            </div>
-
-            <!-- Role Selection -->
-            <div class="form-group">
-                <label for="role-select">
-                    Role
-                    <span class="help-icon" title="Change role using in-session switching">?</span>
-                </label>
+                <label for="role-select">Role</label>
                 <select id="role-select" class="input-field">
                     <option value="">Loading roles...</option>
                 </select>
-                <small class="help-text">
-                    💡 Change warehouse and/or role, then click Update Context below.
-                </small>
             </div>
 
-            <button id="btn-update-context" class="primary-button">
-                Update Context
-            </button>
-
-            <div class="info-card" id="current-context" style="display: none; margin-top: 16px;">
-                <div class="info-row">
-                    <span class="label">Current Warehouse:</span>
-                    <span class="value" id="current-warehouse">-</span>
-                </div>
-                <div class="info-row">
-                    <span class="label">Current Role:</span>
-                    <span class="value" id="current-role">-</span>
-                </div>
+            <div class="form-group">
+                <label for="warehouse-select">Warehouse</label>
+                <select id="warehouse-select" class="input-field">
+                    <option value="">Select role first...</option>
+                </select>
             </div>
 
-            <button id="btn-disconnect" class="secondary-button" style="margin-top: 16px;">
-                Disconnect
-            </button>
-
-            <div class="success-message">
-                <p>🎉 You're ready to query Semantic Views!</p>
-                <small>(Feature coming soon)</small>
+            <div class="button-group">
+                <button type="button" id="btn-connect-warehouse" class="primary-button" disabled>
+                    Connect to Snowflake
+                </button>
             </div>
         </section>
 
-        <!-- Loading Overlay -->
-        <div id="loading-overlay" class="overlay" style="display: none;">
+        <section id="main-explorer-section" class="section hidden">
+            <div class="context-bar">
+                <div class="context-info">
+                    <span class="context-item">
+                        <strong>Role:</strong> <span id="ctx-role">-</span>
+                    </span>
+                    <span class="context-item">
+                        <strong>Warehouse:</strong> <span id="ctx-warehouse">-</span>
+                    </span>
+                </div>
+                <div class="context-actions">
+                    <button type="button" id="btn-change-context" class="link-button">
+                        Change Context
+                    </button>
+                    <button type="button" id="btn-disconnect" class="link-button">
+                        Disconnect
+                    </button>
+                </div>
+            </div>
+
+            <h2>Semantic View Explorer</h2>
+
+            <div class="form-group">
+                <label for="database-select">Database</label>
+                <select id="database-select" class="input-field">
+                    <option value="">Select database...</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="schema-select">Schema</label>
+                <select id="schema-select" class="input-field" disabled>
+                    <option value="">Select schema...</option>
+                </select>
+            </div>
+
+            <div id="semantic-views-catalog" class="catalog-section hidden">
+                <h3>Semantic Views</h3>
+                <div id="semantic-views-list" class="views-list"></div>
+            </div>
+
+            <div id="view-metadata-section" class="metadata-section hidden">
+                <div class="section-header">
+                    <h3>Selected View: <span id="selected-view-name"></span></h3>
+                    <button type="button" id="btn-close-view" class="icon-button" title="Close view">×</button>
+                </div>
+
+                <div class="metadata-group">
+                    <details open>
+                        <summary>
+                            <strong>Dimensions</strong>
+                            <span class="count" id="dimensions-count">0</span>
+                        </summary>
+                        <ul id="dimensions-list" class="field-list"></ul>
+                    </details>
+                </div>
+
+                <div class="metadata-group">
+                    <details open>
+                        <summary>
+                            <strong>Metrics</strong>
+                            <span class="count" id="metrics-count">0</span>
+                        </summary>
+                        <ul id="metrics-list" class="field-list"></ul>
+                    </details>
+                </div>
+
+                <div class="metadata-group">
+                    <details open>
+                        <summary>
+                            <strong>Facts</strong>
+                            <span class="count" id="facts-count">0</span>
+                        </summary>
+                        <ul id="facts-list" class="field-list"></ul>
+                    </details>
+                </div>
+
+                <div id="filters-section" class="metadata-group hidden">
+                    <details>
+                        <summary>
+                            <strong>Recommended Filters</strong>
+                            <span class="count" id="filters-count">0</span>
+                        </summary>
+                        <ul id="recommended-filters-list" class="field-list"></ul>
+                    </details>
+                </div>
+
+                <div class="adhoc-metrics-section">
+                    <div class="section-header">
+                        <h3>Adhoc Metrics</h3>
+                        <button type="button" id="btn-create-adhoc-metric" class="primary-button small-button">
+                            + Create Adhoc Metric
+                        </button>
+                    </div>
+                    <div id="adhoc-metrics-container"></div>
+                </div>
+
+                <div class="query-actions">
+                    <button type="button" id="btn-load-to-excel" class="primary-button">
+                        Load Data to Excel
+                    </button>
+                    <button type="button" id="btn-preview-query" class="secondary-button">
+                        Preview Query
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <div id="change-context-modal" class="modal-overlay hidden">
+            <div class="modal-dialog">
+                <div class="modal-header">
+                    <h3>Change Role or Warehouse</h3>
+                    <button type="button" class="close-btn" id="modal-close-btn">×</button>
+                </div>
+                <div class="modal-body">
+                    <p class="warning-text">⚠️ Changing context will clear your current selection and reload databases.</p>
+
+                    <div class="form-group">
+                        <label for="modal-role-select">Role</label>
+                        <select id="modal-role-select" class="input-field">
+                            <option value="">Loading roles...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="modal-warehouse-select">Warehouse</label>
+                        <select id="modal-warehouse-select" class="input-field">
+                            <option value="">Loading warehouses...</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="modal-cancel-btn" class="secondary-button">Cancel</button>
+                    <button type="button" id="modal-apply-btn" class="primary-button">Apply Changes</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="loading-overlay" class="overlay hidden">
             <div class="spinner"></div>
             <p id="loading-text">Connecting to Snowflake...</p>
         </div>
 
-        <!-- Error Message -->
-        <div id="error-message" class="error-toast" style="display: none;">
+        <div id="error-message" class="error-toast hidden">
             <span id="error-text"></span>
-            <button id="error-close" class="close-btn">×</button>
+            <button type="button" id="error-close" class="close-btn">×</button>
         </div>
     </div>
 
-    <!-- Import taskpane JavaScript -->
     <script src="taskpane.js"></script>
 </body>
 </html>

@@ -6,8 +6,45 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 80;
 
+// SECURITY: CORS configuration with strict origin validation
+// IMPORTANT: Never use wildcard '*' with credentials: true
+// This configuration requires ALLOWED_ORIGINS to be set in production
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',')
+  : process.env.NODE_ENV === 'production'
+    ? [] // Production MUST set ALLOWED_ORIGINS explicitly - fail secure
+    : [
+        // Development defaults - safe for local development only
+        'https://localhost:3000',
+        'http://localhost:3000',
+        'https://127.0.0.1:3000',
+        'http://127.0.0.1:3000',
+        'https://localhost',
+        'http://localhost'
+      ];
+
+// Validate that production has ALLOWED_ORIGINS configured
+if (process.env.NODE_ENV === 'production' && allowedOrigins.length === 0) {
+  console.error('ERROR: ALLOWED_ORIGINS environment variable must be set in production mode');
+  console.error('Example: ALLOWED_ORIGINS=https://yourdomain.com,https://app.yourdomain.com');
+  process.exit(1);
+}
+
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : '*',
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, curl, Postman)
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    // Check if origin is in allowlist
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.warn(`CORS: Blocked request from unauthorized origin: ${origin}`);
+      callback(new Error(`CORS policy: Origin ${origin} is not allowed`));
+    }
+  },
   credentials: true
 }));
 

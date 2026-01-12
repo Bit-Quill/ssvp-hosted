@@ -245,16 +245,37 @@
         // Try window.opener (for regular popups)
         if (window.opener && !window.opener.closed) {
           try {
-            // Send to task pane origin (https://localhost:3000)
-            window.opener.postMessage(data, 'https://localhost:3000');
-            console.log('✅ Message sent via window.opener to https://localhost:3000');
+            // SECURITY: Only send to specific allowed origins, NEVER use '*' wildcard
+            // This prevents malicious websites from intercepting OAuth credentials
+            const allowedOrigins = [
+              // Development
+              'https://localhost:3000',
+              'http://localhost:3000',
+              'http://127.0.0.1:3000',
+              'https://127.0.0.1:3000',
+              // Production - add your production domain here
+              // 'https://your-production-domain.com',
+              // Same origin (the origin hosting this callback page)
+              window.location.origin
+            ];
 
-            // Also try wildcard in case origin is different
-            window.opener.postMessage(data, '*');
-            console.log('✅ Message also sent to wildcard origin');
+            // Send only to explicitly allowed origins
+            let messageSent = false;
+            for (const origin of allowedOrigins) {
+              try {
+                window.opener.postMessage(data, origin);
+                console.log(`✅ Message sent via window.opener to ${origin}`);
+                messageSent = true;
+              } catch (postErr) {
+                // It's normal for some origins to fail if they don't match
+                console.debug(`Could not send to ${origin}:`, postErr.message);
+              }
+            }
 
-            if (statusEl) statusEl.textContent = '✅ Message sent to opener';
-            return true;
+            if (messageSent && statusEl) {
+              statusEl.textContent = '✅ Message sent to opener';
+            }
+            return messageSent;
           } catch (err) {
             console.error('window.opener error:', err);
             if (statusEl) statusEl.textContent = '❌ window.opener error: ' + err.message;

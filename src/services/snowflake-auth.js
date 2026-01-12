@@ -8,7 +8,8 @@ const SnowflakeAuth = {
     role: null,
     authMethod: 'oauth',
     clientId: null,
-    clientSecret: null,
+    // Note: clientSecret should NEVER be stored client-side
+    // It should only exist on the backend server
     integrationName: null,
     redirectUri: null, // Will be set dynamically based on clientId
     scopes: ['refresh_token']
@@ -417,8 +418,7 @@ const SnowflakeAuth = {
         body: JSON.stringify({
           refresh_token: this.refreshToken,
           account: this.config.account,
-          client_id: this.config.clientId,
-          client_secret: this.config.clientId === 'LOCAL_APPLICATION' ? 'LOCAL_APPLICATION' : this.config.clientSecret
+          client_id: this.config.clientId
         })
       });
 

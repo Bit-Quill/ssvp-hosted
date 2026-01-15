@@ -382,8 +382,8 @@ async function loadWarehousesAndRoles() {
   try {
     showLoading('Loading available roles...');
 
-    const rolesResult = await SnowflakeAuth.executeStatement('SHOW ROLES');
-    state.availableRoles = rolesResult.data.map(row => row[1]);
+    const rolesResult = await SnowflakeAPI.executeQuery('SHOW ROLES');
+    state.availableRoles = rolesResult.rows.map(row => row.name);
 
     populateWizardRoleDropdown();
     hideLoading();
@@ -430,8 +430,8 @@ function populateWizardWarehouseDropdown() {
 
 async function loadWarehousesForRole(role) {
   try {
-    const warehousesResult = await SnowflakeAuth.executeStatement('SHOW WAREHOUSES', { role: role });
-    state.availableWarehouses = warehousesResult.data.map(row => row[0]);
+    const warehousesResult = await SnowflakeAPI.executeQuery('SHOW WAREHOUSES', { role: role });
+    state.availableWarehouses = warehousesResult.rows.map(row => row.name);
     populateWizardWarehouseDropdown();
   } catch (error) {
     throw new Error(`Failed to load warehouses for role ${role}: ${error.message}`);
@@ -503,12 +503,12 @@ async function handleConnectWarehouse() {
     SnowflakeAuth.setContext(state.warehouse, state.role);
 
     // Verify context was set
-    const result = await SnowflakeAuth.executeStatement(
+    const result = await SnowflakeAPI.executeQuery(
       'SELECT CURRENT_WAREHOUSE() AS WH, CURRENT_ROLE() AS ROLE'
     );
 
-    const verifiedWarehouse = result.data[0][0];
-    const verifiedRole = result.data[0][1];
+    const verifiedWarehouse = result.rows[0].WH;
+    const verifiedRole = result.rows[0].ROLE;
 
     if (verifiedWarehouse !== state.warehouse || verifiedRole !== state.role) {
       throw new Error('Failed to set context. Please try again.');
@@ -629,12 +629,12 @@ async function applyContextChange() {
     // Set new context
     SnowflakeAuth.setContext(newWarehouse, newRole);
 
-    const result = await SnowflakeAuth.executeStatement(
+    const result = await SnowflakeAPI.executeQuery(
       'SELECT CURRENT_WAREHOUSE() AS WH, CURRENT_ROLE() AS ROLE'
     );
 
-    const verifiedWarehouse = result.data[0][0];
-    const verifiedRole = result.data[0][1];
+    const verifiedWarehouse = result.rows[0].WH;
+    const verifiedRole = result.rows[0].ROLE;
 
     if (verifiedWarehouse !== newWarehouse || verifiedRole !== newRole) {
       throw new Error('Failed to change context');

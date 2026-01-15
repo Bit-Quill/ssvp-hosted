@@ -503,39 +503,6 @@ const SnowflakeAuth = {
     }
   },
 
-  async executeStatement(sql, options = {}) {
-    const token = await this.getAccessToken();
-
-    const requestBody = {
-      statement: sql,
-      timeout: 60
-    };
-
-    if (options.warehouse || this.config.warehouse) {
-      requestBody.warehouse = options.warehouse || this.config.warehouse;
-    }
-
-    if (options.role || this.config.role) {
-      requestBody.role = options.role || this.config.role;
-    }
-
-    const response = await fetch(`https://${this.config.account}.snowflakecomputing.com/api/v2/statements`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(requestBody)
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Statement execution failed');
-    }
-
-    return response.json();
-  },
-
   setContext(warehouse, role) {
     if (warehouse) {
       this.config.warehouse = warehouse;

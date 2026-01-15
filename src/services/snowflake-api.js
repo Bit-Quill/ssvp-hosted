@@ -91,6 +91,9 @@ const SnowflakeAPI = {
   async pollForResults(statusUrl) {
     const maxAttempts = 60;
     let attempts = 0;
+    const initialDelay = 500; // Start with 500ms
+    const maxDelay = 5000;     // Cap at 5 seconds
+    const backoffMultiplier = 1.5;
 
     while (attempts < maxAttempts) {
       try {
@@ -124,8 +127,9 @@ const SnowflakeAPI = {
           throw new Error(status.message || 'Query execution failed');
         }
 
-        // Still running, continue polling
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Calculate exponential backoff delay
+        const delay = Math.min(initialDelay * Math.pow(backoffMultiplier, attempts), maxDelay);
+        await new Promise(resolve => setTimeout(resolve, delay));
         attempts++;
       } catch (error) {
         console.error('Polling error:', error);
@@ -260,13 +264,11 @@ const SnowflakeAPI = {
             });
             break;
 
-          case 'MEASURE':
           case 'METRIC':
             metrics.push({
               ...field,
               expression: row.expr || null,
-              logicalTable: row.logical_table || null,
-              aggregationType: row.aggregation || 'SUM'
+              logicalTable: row.logical_table || null
             });
             break;
 
@@ -278,19 +280,6 @@ const SnowflakeAPI = {
               canBeMetric: isNumeric,
               logicalTable: row.logical_table || null
             });
-            break;
-
-          case 'FILTER':
-            // Implements: Filter Discovery requirement
-            // Non-enforced filters are recommended filters
-            if (!row.is_enforced || row.is_enforced === 'false') {
-              nonEnforcedFilters.push({
-                name: row.name,
-                expression: row.expr,
-                description: row.description || '',
-                columnName: this.extractColumnFromFilter(row.expr)
-              });
-            }
             break;
         }
       });
@@ -349,6 +338,10 @@ const SnowflakeAPI = {
   /**
    * Validate if a dimension can be used with a metric
    * Uses: SHOW SEMANTIC DIMENSION FOR METRIC
+   *
+   * TODO: Consider implementing caching for metadata calls (describeSemanticView,
+   * validateDimensionForMetric, getDatabases, getSchemas, etc.) to improve performance
+   * and reduce server load. Metadata doesn't change frequently within a session.
    */
   async validateDimensionForMetric(semanticView, metricName, dimensionName) {
     try {
@@ -384,18 +377,6 @@ const SnowflakeAPI = {
   },
 
   /**
-   * Helper: Extract column name from filter expression
-   * Example: "year >= 2020" -> "year"
-   */
-  extractColumnFromFilter(expression) {
-    if (!expression) return null;
-
-    // Simple regex to extract first identifier
-    const match = expression.match(/^(\w+)/);
-    return match ? match[1] : null;
-  },
-
-  /**
    * Execute a semantic query with adhoc metrics
    */
   async executeSemanticQuery(config) {
@@ -410,19 +391,29 @@ const SnowflakeAPI = {
     } = config;
 
     try {
-      // Build SELECT clause
-      const selectFields = [...dimensions, ...metrics];
-
-      // Add adhoc metrics
-      adhocMetrics.forEach(adhoc => {
-        selectFields.push(`${adhoc.expression} AS ${adhoc.name}`);
-      });
-
-      if (selectFields.length === 0) {
+      // Must have at least one field selected
+      if (dimensions.length === 0 && metrics.length === 0 && adhocMetrics.length === 0) {
         throw new Error('Please select at least one field');
       }
 
-      const selectClause = selectFields.join(', ');
+      // Build DIMENSIONS clause
+      let dimensionsClause = '';
+      if (dimensions.length > 0) {
+        dimensionsClause = `DIMENSIONS ${dimensions.join(', ')}`;
+      }
+
+      // Build METRICS clause (includes both predefined metrics and adhoc metrics)
+      let metricsClause = '';
+      if (metrics.length > 0 || adhocMetrics.length > 0) {
+        const allMetrics = [...metrics];
+
+        // Add adhoc metrics with their expressions
+        adhocMetrics.forEach(adhoc => {
+          allMetrics.push(`${adhoc.expression} AS ${adhoc.name}`);
+        });
+
+        metricsClause = `METRICS ${allMetrics.join(', ')}`;
+      }
 
       // Build WHERE clause
       let whereClause = '';
@@ -431,38 +422,27 @@ const SnowflakeAPI = {
           if (filter.operator === 'IN') {
             const values = filter.values.map(v => `'${this.escapeSQL(v)}'`).join(', ');
             return `${filter.field} IN (${values})`;
-          } else if (filter.operator === '=') {
-            return `${filter.field} = '${this.escapeSQL(filter.values[0])}'`;
-          } else if (filter.operator === '>') {
-            return `${filter.field} > '${this.escapeSQL(filter.values[0])}'`;
-          } else if (filter.operator === '<') {
-            return `${filter.field} < '${this.escapeSQL(filter.values[0])}'`;
+          } else if (['=', '>', '<'].includes(filter.operator)) {
+            return `${filter.field} ${filter.operator} '${this.escapeSQL(filter.values[0])}'`;
           }
           return '';
         }).filter(Boolean);
 
         if (conditions.length > 0) {
-          whereClause = 'WHERE ' + conditions.join(' AND ');
+          whereClause = `WHERE ${conditions.join(' AND ')}`;
         }
       }
 
-      // Build GROUP BY clause (if metrics are used)
-      let groupByClause = '';
-      if (metrics.length > 0 || adhocMetrics.length > 0) {
-        if (dimensions.length > 0) {
-          groupByClause = `GROUP BY ${dimensions.join(', ')}`;
-        }
-      }
+      // Build SEMANTIC_VIEW() query
+      // Note: GROUP BY is not needed - semantic views handle aggregation automatically
+      const semanticViewClauses = [
+        semanticView,
+        metricsClause,
+        dimensionsClause,
+        whereClause
+      ].filter(Boolean).join('\n  ');
 
-      // Build final query
-      let query = `SELECT ${selectClause} FROM ${semanticView}`;
-      if (whereClause) {
-        query += ` ${whereClause}`;
-      }
-      if (groupByClause) {
-        query += ` ${groupByClause}`;
-      }
-      query += ` LIMIT ${limit} OFFSET ${offset}`;
+      const query = `SELECT * FROM SEMANTIC_VIEW(\n  ${semanticViewClauses}\n) LIMIT ${limit} OFFSET ${offset}`;
 
       const result = await this.executeQuery(query);
       return result;

@@ -87,6 +87,40 @@ module.exports = async (env, options) => {
         options: env.WEBPACK_BUILD || options.https !== undefined ? options.https : await getHttpsOptions(),
       },
       port: process.env.npm_package_config_dev_server_port || 3000,
+      setupMiddlewares: (middlewares, devServer) => {
+        const path = require('path');
+        const express = require('express');
+
+        // Add JSON body parser
+        devServer.app.use(express.json());
+        devServer.app.use(express.urlencoded({ extended: true }));
+
+        // OAuth auth start route
+        devServer.app.get('/auth/auth-start.html', (req, res) => {
+          res.sendFile(path.join(__dirname, 'src/auth/auth-start.html'));
+        });
+
+        // OAuth callback route
+        devServer.app.get('/auth/callback', (req, res) => {
+          // Serve the callback HTML page
+          res.sendFile(path.join(__dirname, 'src/auth/callback.html'));
+        });
+
+        // Test route
+        devServer.app.get('/api/test', (req, res) => {
+          res.json({ status: 'ok', message: 'API is working!' });
+        });
+
+        // Auth API routes (token exchange proxy)
+        try {
+          const authRoutes = require('./server/routes/auth');
+          devServer.app.use('/api/auth', authRoutes);
+        } catch (error) {
+          // Auth routes failed to load
+        }
+
+        return middlewares;
+      },
     },
   };
 

@@ -16,7 +16,7 @@
     "build": "webpack --mode production",
     "build:dev": "webpack --mode development",
     "dev-server": "webpack serve --mode development",
-    "dev": "webpack serve --mode development --https",
+    "dev": "webpack serve --mode development",
     "server": "node server/server.js",
     "test": "jest",
     "lint": "office-addin-lint check",

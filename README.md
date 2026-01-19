@@ -68,10 +68,58 @@ This Excel Add-in enables business analysts to securely connect to **Snowflake S
 
     Once you are finished testing and debugging the add-in, select the <img src="./assets/Icon_Office_Add-ins_Development_Kit.png" width="30" alt="The Office Add-ins Development Kit icon in the activity bar of VSCode"/> icon and then select **Stop Previewing Your Office Add-in**. This closes the web server and removes the add-in from the registry and cache.
 
+## Authentication Setup
+
+This add-in supports two OAuth integration modes:
+
+### Option 1: Using SNOWFLAKE$LOCAL_APPLICATION (Recommended for Quick Start)
+
+The global `SNOWFLAKE$LOCAL_APPLICATION` integration allows authentication without custom OAuth setup.
+
+**Requirements:**
+- Server must run on port 80 (default HTTP port)
+- Run with administrator/root privileges: `sudo npm run server:local-app`
+
+**To connect:**
+1. Start the server: `sudo npm run server:local-app`
+2. Leave the "OAuth Client ID" field **empty** in the Excel add-in
+3. Enter your Snowflake account and click "Connect with Snowflake"
+
+See [SNOWFLAKE_LOCAL_APP_SETUP.md](./SNOWFLAKE_LOCAL_APP_SETUP.md) for detailed instructions.
+
+### Option 2: Using Custom OAuth Integration (For Port 3000)
+
+If you can't run on port 80, create a custom OAuth integration:
+
+```sql
+CREATE SECURITY INTEGRATION my_excel_oauth
+  TYPE = OAUTH
+  ENABLED = TRUE
+  OAUTH_CLIENT = PUBLIC
+  OAUTH_CLIENT_TYPE = 'PUBLIC'
+  OAUTH_REDIRECT_URI = 'http://127.0.0.1:3000/auth/callback'
+  OAUTH_ISSUE_REFRESH_TOKENS = TRUE
+  OAUTH_REFRESH_TOKEN_VALIDITY = 7776000
+  OAUTH_ENFORCE_PKCE = TRUE;
+
+-- Get the client ID
+DESC SECURITY INTEGRATION my_excel_oauth;
+-- Copy the OAUTH_CLIENT_ID value
+```
+
+**To connect:**
+1. Start the server: `npm run server:custom` (runs on port 3000)
+2. Paste the OAUTH_CLIENT_ID in the Excel add-in
+3. Enter your Snowflake account and click "Connect with Snowflake"
+
 ## Use the sample add-in
 
-1. Select a cell in the current worksheet.
-2. Select `Run` in the task pane.
+1. Start the authentication server (see Authentication Setup above)
+2. Open Excel and sideload the add-in (F5 in VS Code)
+3. In the task pane, enter your Snowflake account details
+4. Click "Connect with Snowflake"
+5. Select a warehouse and optionally choose a role
+6. Browse semantic views and query data
 
 ## Explore sample files
 

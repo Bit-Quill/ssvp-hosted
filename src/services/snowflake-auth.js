@@ -1,5 +1,16 @@
 import PKCEHelper from '../utils/pkce-helper.js';
 
+const AUTH_CONFIG = {
+  DIALOG_HEIGHT_PERCENT: 60,
+  DIALOG_WIDTH_PERCENT: 30,
+  POPUP_WIDTH_PX: 500,
+  POPUP_HEIGHT_PX: 600,
+  POLLING_INTERVAL_MS: 1000,
+  OAUTH_TIMEOUT_MS: 10 * 60 * 1000,
+  POPUP_TIMEOUT_MS: 5 * 60 * 1000,
+  TOKEN_EXPIRY_BUFFER_MS: 5 * 60 * 1000
+};
+
 const SnowflakeAuth = {
   config: {
     account: null,
@@ -53,7 +64,7 @@ const SnowflakeAuth = {
       return new Promise((resolve, reject) => {
         Office.context.ui.displayDialogAsync(
           dialogUrl,
-          { height: 60, width: 30, displayInIframe: false },
+          { height: AUTH_CONFIG.DIALOG_HEIGHT_PERCENT, width: AUTH_CONFIG.DIALOG_WIDTH_PERCENT, displayInIframe: false },
           (asyncResult) => {
             if (asyncResult.status === Office.AsyncResultStatus.Failed) {
               PKCEHelper.clearPKCEParams();
@@ -71,23 +82,11 @@ const SnowflakeAuth = {
                 if (messageData.type === 'SNOWFLAKE_AUTH_SUCCESS') {
                   if (!PKCEHelper.validateState(messageData.state)) {
                     PKCEHelper.clearPKCEParams();
-                    return reject(new Error('Invalid state parameter - possible CSRF attack'));
+                    return reject(new Error('Invalid state parameter'));
                   }
 
-                  const tokens = await this.exchangeCodeForTokens(messageData.code, codeVerifier);
-
-                  this.accessToken = tokens.access_token;
-                  this.refreshToken = tokens.refresh_token;
-                  this.tokenExpiry = Date.now() + (tokens.expires_in * 1000);
-                  this.authMethod = 'oauth';
-
-                  PKCEHelper.clearPKCEParams();
-
-                  resolve({
-                    success: true,
-                    token: this.accessToken,
-                    expiresIn: tokens.expires_in
-                  });
+                  const result = await this._completeOAuthFlow(messageData.code, codeVerifier);
+                  resolve(result);
                 } else if (messageData.type === 'SNOWFLAKE_AUTH_ERROR') {
                   PKCEHelper.clearPKCEParams();
                   reject(new Error(messageData.error || 'Authentication failed'));
@@ -113,25 +112,9 @@ const SnowflakeAuth = {
                     return reject(new Error('Invalid state parameter'));
                   }
 
-                  this.exchangeCodeForTokens(authData.code, codeVerifier)
-                    .then(tokens => {
-                      this.accessToken = tokens.access_token;
-                      this.refreshToken = tokens.refresh_token;
-                      this.tokenExpiry = Date.now() + (tokens.expires_in * 1000);
-                      this.authMethod = 'oauth';
-
-                      PKCEHelper.clearPKCEParams();
-
-                      resolve({
-                        success: true,
-                        token: this.accessToken,
-                        expiresIn: tokens.expires_in
-                      });
-                    })
-                    .catch(error => {
-                      PKCEHelper.clearPKCEParams();
-                      reject(error);
-                    });
+                  this._completeOAuthFlow(authData.code, codeVerifier)
+                    .then(result => resolve(result))
+                    .catch(error => reject(error));
                 }
               } catch (error) {
                 console.error('localStorage polling error:', error);
@@ -175,30 +158,39 @@ const SnowflakeAuth = {
       const authResult = await this.waitForAuthCallback(authWindow);
 
       if (!PKCEHelper.validateState(authResult.state)) {
-        throw new Error('Invalid state parameter - possible CSRF attack');
+        throw new Error('Invalid state parameter');
       }
 
-      const tokens = await this.exchangeCodeForTokens(authResult.code, codeVerifier);
-
-      this.accessToken = tokens.access_token;
-      this.refreshToken = tokens.refresh_token;
-      this.tokenExpiry = Date.now() + (tokens.expires_in * 1000);
-      this.authMethod = 'oauth';
-
-      PKCEHelper.clearPKCEParams();
+      const result = await this._completeOAuthFlow(authResult.code, codeVerifier);
 
       return {
-        success: true,
-        token: this.accessToken,
+        ...result,
         warehouse: this.config.warehouse,
-        role: this.config.role,
-        expiresIn: tokens.expires_in
+        role: this.config.role
       };
     } catch (error) {
       PKCEHelper.clearPKCEParams();
       this.logout();
       throw new Error(`OAuth login failed: ${error.message}`);
     }
+  },
+
+  _setAuthTokens(tokens) {
+    this.accessToken = tokens.access_token;
+    this.refreshToken = tokens.refresh_token;
+    this.tokenExpiry = Date.now() + (tokens.expires_in * 1000);
+    this.authMethod = 'oauth';
+  },
+
+  async _completeOAuthFlow(code, codeVerifier) {
+    const tokens = await this.exchangeCodeForTokens(code, codeVerifier);
+    this._setAuthTokens(tokens);
+    PKCEHelper.clearPKCEParams();
+    return {
+      success: true,
+      token: this.accessToken,
+      expiresIn: tokens.expires_in
+    };
   },
 
   buildOAuthUrl(codeChallenge, state) {
@@ -222,8 +214,8 @@ const SnowflakeAuth = {
   },
 
   openAuthWindowEarly() {
-    const width = 500;
-    const height = 600;
+    const width = AUTH_CONFIG.POPUP_WIDTH_PX;
+    const height = AUTH_CONFIG.POPUP_HEIGHT_PX;
     const left = (window.screen.width - width) / 2;
     const top = (window.screen.height - height) / 2;
 
@@ -461,10 +453,6 @@ const SnowflakeAuth = {
     }
 
     return this.accessToken;
-  },
-
-  async loginWithKeyPair(username, privateKey) {
-    throw new Error('Key-pair authentication not yet implemented');
   },
 
   async loginWithPAT(pat) {

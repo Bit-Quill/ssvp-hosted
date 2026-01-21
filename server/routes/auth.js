@@ -40,6 +40,10 @@ function getSafeErrorMessage(error, context) {
   if (errorString.includes('access_denied')) {
     return 'Access denied. Please check your permissions.';
   }
+  if (errorString.includes('Incorrect username or password') ||
+      errorString.includes('Invalid username or password')) {
+    return 'Incorrect username or password. Please try again.';
+  }
 
   // Network/connectivity errors
   if (errorString.includes('ECONNREFUSED') || errorString.includes('ETIMEDOUT')) {

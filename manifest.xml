@@ -2,17 +2,15 @@
 <OfficeApp xmlns="http://schemas.microsoft.com/office/appforoffice/1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0" xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="TaskPaneApp">
   <Id>aa0fe898-099a-4e75-a891-c2e9c139e6d9</Id>
   <Version>1.0.0.0</Version>
-  <ProviderName>Contoso</ProviderName>
+  <ProviderName>Snowflake</ProviderName>
   <DefaultLocale>en-US</DefaultLocale>
-  <DisplayName DefaultValue="Excel-Snowflake"/>
-  <Description DefaultValue="A template to get started."/>
+  <DisplayName DefaultValue="Snowflake Excel Plugin"/>
+  <Description DefaultValue="Connect to Snowflake semantic views and build interactive reports in Excel"/>
   <IconUrl DefaultValue="https://localhost:3000/assets/icon-32.png"/>
   <HighResolutionIconUrl DefaultValue="https://localhost:3000/assets/icon-64.png"/>
-  <SupportUrl DefaultValue="https://www.contoso.com/help"/>
+  <SupportUrl DefaultValue="https://www.snowflake.com/support"/>
   <AppDomains>
-    <AppDomain>https://www.contoso.com</AppDomain>
     <AppDomain>https://*.snowflakecomputing.com</AppDomain>
-    <AppDomain>https://NOC31872.snowflakecomputing.com</AppDomain>
     <AppDomain>http://127.0.0.1</AppDomain>
   </AppDomains>
   <Hosts>
@@ -73,13 +71,13 @@
         <bt:Url id="Taskpane.Url" DefaultValue="https://localhost:3000/taskpane.html"/>
       </bt:Urls>
       <bt:ShortStrings>
-        <bt:String id="GetStarted.Title" DefaultValue="Get started with your sample add-in!"/>
-        <bt:String id="CommandsGroup.Label" DefaultValue="Commands Group"/>
-        <bt:String id="TaskpaneButton.Label" DefaultValue="Snowflake add-in"/>
+        <bt:String id="GetStarted.Title" DefaultValue="Connect to Snowflake"/>
+        <bt:String id="CommandsGroup.Label" DefaultValue="Snowflake"/>
+        <bt:String id="TaskpaneButton.Label" DefaultValue="Snowflake"/>
       </bt:ShortStrings>
       <bt:LongStrings>
-        <bt:String id="GetStarted.Description" DefaultValue="Your sample add-in loaded successfully. Go to the HOME tab and click the 'Show Taskpane' button to get started."/>
-        <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Click to Show a Taskpane"/>
+        <bt:String id="GetStarted.Description" DefaultValue="Access Snowflake semantic views and build dynamic Excel reports with real-time data"/>
+        <bt:String id="TaskpaneButton.Tooltip" DefaultValue="Open Snowflake connector to access semantic views and create data tables"/>
       </bt:LongStrings>
     </Resources>
   </VersionOverrides>

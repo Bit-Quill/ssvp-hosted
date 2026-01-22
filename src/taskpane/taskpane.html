@@ -4,7 +4,11 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Snowflake Connector</title>
+    <title>Snowflake Excel Plugin</title>
+    <script type="text/javascript">
+        // Set window title immediately (before Office.js loads)
+        document.title = 'Snowflake Excel Plugin';
+    </script>
 
     <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
     <link rel="stylesheet" href="https://static2.sharepointonline.com/files/fabric/office-ui-fabric-core/11.0.0/css/fabric.min.css"/>
@@ -13,11 +17,6 @@
 
 <body class="ms-Fabric">
     <div id="app">
-        <header class="header compact-header">
-            <div class="logo">❄️</div>
-            <h1>Snowflake Connector</h1>
-        </header>
-
         <div id="connection-status" class="status-section">
             <div class="status-indicator">
                 <span class="status-dot disconnected" id="status-dot"></span>
@@ -43,7 +42,7 @@
             </div>
 
             <button type="button" id="btn-connect" class="primary-button">
-                <span id="btn-connect-text">Connect with Snowflake</span>
+                <span id="btn-connect-text">Connect with OAuth</span>
             </button>
         </section>
 
@@ -111,69 +110,116 @@
                 <h3>Semantic Views</h3>
                 <div id="semantic-views-list" class="views-list"></div>
             </div>
+        </section>
 
-            <div id="view-metadata-section" class="metadata-section hidden">
-                <div class="section-header">
-                    <h3>Selected View: <span id="selected-view-name"></span></h3>
-                    <button type="button" id="btn-close-view" class="icon-button" title="Close view">×</button>
+        <!-- Pivot Configuration Panel (shown when view is selected) -->
+        <section id="pivot-configuration-section" class="section hidden">
+            <div class="navigation-bar">
+                <button type="button" id="btn-back-to-catalog" class="link-button">
+                    ← Back to Catalog
+                </button>
+                <button type="button" id="btn-disconnect-pivot" class="link-button">
+                    Disconnect
+                </button>
+            </div>
+
+            <div id="view-metadata-section" class="metadata-section">
+                <div class="field-list-panel">
+                    <div class="field-list-panel-header" id="field-list-panel-toggle">
+                        <div class="field-list-panel-title">
+                            <strong>Choose Fields to Add to Report</strong>
+                            <small>Search and select fields for your data table</small>
+                        </div>
+                        <span class="field-list-toggle-icon">▼</span>
+                    </div>
+
+                    <div class="field-list-panel-content" id="field-list-panel-content">
+                        <div class="field-search-container">
+                            <input type="text" id="field-search" class="field-search-input" placeholder="Search fields...">
+                        </div>
+
+                        <ul id="unified-field-list" class="unified-field-list"></ul>
+                    </div>
                 </div>
 
-                <div class="metadata-group">
-                    <details open>
-                        <summary>
-                            <strong>Dimensions</strong>
-                            <span class="count" id="dimensions-count">0</span>
-                        </summary>
-                        <ul id="dimensions-list" class="field-list"></ul>
-                    </details>
-                </div>
+                <div class="filters-panel">
+                    <div class="filters-panel-header" id="filters-panel-toggle">
+                        <div class="filters-panel-title">
+                            <strong>Query Filters</strong>
+                            <small>Filter data before loading (reduces data size)</small>
+                        </div>
+                        <span class="filters-toggle-icon">▼</span>
+                    </div>
 
-                <div class="metadata-group">
-                    <details open>
-                        <summary>
-                            <strong>Metrics</strong>
-                            <span class="count" id="metrics-count">0</span>
-                        </summary>
-                        <ul id="metrics-list" class="field-list"></ul>
-                    </details>
-                </div>
+                    <div class="filters-panel-content" id="filters-panel-content">
+                        <div id="recommended-filters-container" class="hidden">
+                            <div class="recommended-filters-header">
+                                <span>💡 Recommended Filters</span>
+                            </div>
+                            <div id="recommended-filters-list"></div>
+                        </div>
 
-                <div class="metadata-group">
-                    <details open>
-                        <summary>
-                            <strong>Facts</strong>
-                            <span class="count" id="facts-count">0</span>
-                        </summary>
-                        <ul id="facts-list" class="field-list"></ul>
-                    </details>
-                </div>
+                        <div id="custom-filters-container"></div>
 
-                <div id="filters-section" class="metadata-group hidden">
-                    <details>
-                        <summary>
-                            <strong>Recommended Filters</strong>
-                            <span class="count" id="filters-count">0</span>
-                        </summary>
-                        <ul id="recommended-filters-list" class="field-list"></ul>
-                    </details>
-                </div>
-
-                <div class="adhoc-metrics-section">
-                    <div class="section-header">
-                        <h3>Adhoc Metrics</h3>
-                        <button type="button" id="btn-create-adhoc-metric" class="primary-button small-button">
-                            + Create Adhoc Metric
+                        <button type="button" id="btn-add-filter" class="add-filter-button">
+                            + Add Filter
                         </button>
                     </div>
-                    <div id="adhoc-metrics-container"></div>
                 </div>
 
-                <div class="query-actions">
-                    <button type="button" id="btn-load-to-excel" class="primary-button">
-                        Load Data to Excel
+                <div class="query-builder-panel hidden" id="query-builder-panel">
+                    <div class="query-builder-panel-header" id="query-builder-panel-toggle">
+                        <div class="query-builder-panel-title">
+                            <label class="pivot-table-checkbox-label">
+                                <input type="checkbox" id="enable-pivot-table" class="pivot-table-checkbox" />
+                                <span class="pivot-table-label-text">
+                                    <strong>Include Pivot Table</strong>
+                                    <small>Build a pivot table with custom rows, columns, and values</small>
+                                </span>
+                            </label>
+                        </div>
+                        <span class="query-builder-toggle-icon">▼</span>
+                    </div>
+
+                    <div class="query-builder-panel-content" id="query-builder-panel-content">
+                        <div class="drop-zone-container">
+                            <div class="drop-zone-header">
+                                <span class="drop-zone-icon">↔️</span>
+                                <strong>Columns</strong>
+                            </div>
+                            <div class="drop-zone-area" id="columns-drop-zone" data-zone="columns">
+                                <span class="drop-placeholder">Drag fields here</span>
+                            </div>
+                        </div>
+
+                        <div class="drop-zone-container">
+                            <div class="drop-zone-header">
+                                <span class="drop-zone-icon">↕️</span>
+                                <strong>Rows</strong>
+                            </div>
+                            <div class="drop-zone-area" id="rows-drop-zone" data-zone="rows">
+                                <span class="drop-placeholder">Drag fields here</span>
+                            </div>
+                        </div>
+
+                        <div class="drop-zone-container">
+                            <div class="drop-zone-header">
+                                <span class="drop-zone-icon">Σ</span>
+                                <strong>Values</strong>
+                            </div>
+                            <div class="drop-zone-area" id="values-drop-zone" data-zone="values">
+                                <span class="drop-placeholder">Drag fields here</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="query-actions-bar">
+                    <button type="button" id="btn-create-pivot" class="primary-button">
+                        Generate
                     </button>
-                    <button type="button" id="btn-preview-query" class="secondary-button">
-                        Preview Query
+                    <button type="button" id="btn-update-pivot" class="secondary-button" disabled>
+                        Update
                     </button>
                 </div>
             </div>

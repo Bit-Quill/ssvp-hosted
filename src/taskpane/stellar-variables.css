@@ -1,0 +1,355 @@
+/**
+ * Stellar Design System - CSS Variables
+ * Snowflake Design System for all applications
+ */
+
+:root {
+  /* ========== COLORS ========== */
+
+  /* Named Colors */
+  --stellar-color-white: #ffffff;
+  --stellar-color-black: #000000;
+
+  /* Gray Scale */
+  --stellar-gray-05: #fafbfc;
+  --stellar-gray-10: #f5f6f7;
+  --stellar-gray-15: #f0f1f3;
+  --stellar-gray-20: #e8eaed;
+  --stellar-gray-30: #d4d7dd;
+  --stellar-gray-40: #bec3cc;
+  --stellar-gray-50: #98a0ad;
+  --stellar-gray-55: #8891a0;
+  --stellar-gray-60: #6f7988;
+  --stellar-gray-70: #535d6e;
+  --stellar-gray-80: #3d4657;
+  --stellar-gray-85: #2e3543;
+  --stellar-gray-90: #242a35;
+  --stellar-gray-95: #1b1f29;
+
+  /* Blues */
+  --stellar-blue-00: #f0f8ff;
+  --stellar-blue-05: #e3f2fd;
+  --stellar-blue-10: #bbdefb;
+  --stellar-blue-20: #6db5f0;
+  --stellar-blue-30: #4ba7ed;
+  --stellar-blue-40: #2a99eb;
+  --stellar-blue-50: #0784de;
+  --stellar-blue-60: #006abc;
+  --stellar-blue-70: #005198;
+  --stellar-blue-80: #003e7a;
+  --stellar-blue-90: #002b5c;
+
+  /* Greens */
+  --stellar-green-00: #e8f8f2;
+  --stellar-green-10: #c8edd9;
+  --stellar-green-20: #a1e3c0;
+  --stellar-green-30: #7bd8a7;
+  --stellar-green-40: #56ce8f;
+  --stellar-green-50: #31c376;
+  --stellar-green-60: #28a563;
+  --stellar-green-70: #1f8750;
+  --stellar-green-80: #16693e;
+  --stellar-green-90: #0d4b2b;
+
+  /* Reds */
+  --stellar-red-00: #fff5f5;
+  --stellar-red-10: #ffcdd2;
+  --stellar-red-20: #fc9397;
+  --stellar-red-30: #fa6c72;
+  --stellar-red-40: #f8464d;
+  --stellar-red-50: #f62028;
+  --stellar-red-60: #d91b22;
+  --stellar-red-70: #bc161d;
+  --stellar-red-80: #9f1217;
+  --stellar-red-90: #820d12;
+
+  /* Yellows */
+  --stellar-yellow-00: #fffaeb;
+  --stellar-yellow-10: #ffeec2;
+  --stellar-yellow-20: #ffe299;
+  --stellar-yellow-30: #ffd670;
+  --stellar-yellow-40: #ffca47;
+  --stellar-yellow-50: #ffbe1e;
+  --stellar-yellow-60: #e5a500;
+  --stellar-yellow-70: #bf8800;
+  --stellar-yellow-80: #996b00;
+  --stellar-yellow-90: #734e00;
+
+  /* Violets */
+  --stellar-violet-00: #f8f5ff;
+  --stellar-violet-10: #e6dcff;
+  --stellar-violet-20: #d4c3ff;
+  --stellar-violet-30: #c2abff;
+  --stellar-violet-40: #b092ff;
+  --stellar-violet-50: #9e79ff;
+  --stellar-violet-60: #8860e6;
+  --stellar-violet-70: #7247cc;
+  --stellar-violet-80: #5c2fb3;
+  --stellar-violet-90: #461699;
+
+  /* Orange (for Info/Warning states) */
+  --stellar-orange-00: #fff4e6;
+  --stellar-orange-10: #ffe4c2;
+  --stellar-orange-20: #ffd49e;
+  --stellar-orange-30: #ffc47a;
+  --stellar-orange-40: #ffb456;
+  --stellar-orange-50: #ffa432;
+  --stellar-orange-60: #e68d1e;
+  --stellar-orange-70: #cc7610;
+  --stellar-orange-80: #b35f02;
+  --stellar-orange-90: #994800;
+
+  /* Cyan (for Info states) */
+  --stellar-cyan-00: #e0fcff;
+  --stellar-cyan-10: #aaf4ff;
+  --stellar-cyan-20: #74ecff;
+  --stellar-cyan-30: #3ee4ff;
+  --stellar-cyan-40: #08dcff;
+  --stellar-cyan-50: #00d4f7;
+  --stellar-cyan-60: #00bcde;
+  --stellar-cyan-70: #00a4c4;
+  --stellar-cyan-80: #008cab;
+  --stellar-cyan-90: #007491;
+
+  /* Pink (for Alert states) */
+  --stellar-pink-00: #ffe6f0;
+  --stellar-pink-10: #ffc2db;
+  --stellar-pink-20: #ff9ec6;
+  --stellar-pink-30: #ff7ab1;
+  --stellar-pink-40: #ff569c;
+  --stellar-pink-50: #ff3287;
+  --stellar-pink-60: #e61e73;
+  --stellar-pink-70: #cc0a5f;
+  --stellar-pink-80: #b3004b;
+  --stellar-pink-90: #990037;
+
+  /* ========== THEME COLORS ========== */
+
+  /* Level 1 (Light Theme) */
+  --stellar-level1-bg: var(--stellar-color-white);
+  --stellar-level1-border: var(--stellar-gray-30);
+
+  /* Level 2 (Light Theme) */
+  --stellar-level2-bg: var(--stellar-gray-05);
+  --stellar-level2-border: var(--stellar-gray-30);
+
+  /* Level 3 (Light Theme) */
+  --stellar-level3-bg: var(--stellar-gray-10);
+  --stellar-level3-border: var(--stellar-gray-40);
+
+  /* Shadow Colors */
+  --stellar-shadow-1: rgba(0, 0, 0, 0.10);
+  --stellar-shadow-2: rgba(0, 0, 0, 0.15);
+  --stellar-shadow-3: rgba(0, 0, 0, 0.20);
+
+  /* Overlay */
+  --stellar-overlay: rgba(0, 0, 0, 0.50);
+  --stellar-overlay-light: rgba(0, 0, 0, 0.20);
+
+  /* Border Colors */
+  --stellar-border-default: var(--stellar-gray-30);
+  --stellar-border-bright: var(--stellar-gray-40);
+  --stellar-border-hover: var(--stellar-gray-50);
+  --stellar-border-disabled: var(--stellar-gray-20);
+  --stellar-border-active: var(--stellar-blue-50);
+  --stellar-border-focus: var(--stellar-blue-50);
+
+  /* Background Colors */
+  --stellar-bg-null: var(--stellar-gray-30);
+  --stellar-bg-additional-info: var(--stellar-gray-10);
+  --stellar-bg-row-hover: var(--stellar-gray-15);
+  --stellar-bg-component-selected-knockout: var(--stellar-color-white);
+
+  /* Text Colors */
+  --stellar-text-primary: var(--stellar-gray-85);
+  --stellar-text-secondary: var(--stellar-gray-70);
+  --stellar-text-header: var(--stellar-gray-85);
+
+  /* Link Colors */
+  --stellar-link-default: var(--stellar-blue-50);
+  --stellar-link-hover: var(--stellar-blue-60);
+  --stellar-link-press: var(--stellar-blue-70);
+  --stellar-link-disabled: var(--stellar-blue-20);
+
+  /* Link Success Colors */
+  --stellar-link-success-default: var(--stellar-green-60);
+  --stellar-link-success-hover: var(--stellar-green-70);
+  --stellar-link-success-press: var(--stellar-green-80);
+  --stellar-link-success-disabled: var(--stellar-green-30);
+
+  /* Link Critical Colors */
+  --stellar-link-critical-default: var(--stellar-red-50);
+  --stellar-link-critical-hover: var(--stellar-red-60);
+  --stellar-link-critical-press: var(--stellar-red-70);
+  --stellar-link-critical-disabled: var(--stellar-red-30);
+
+  /* Link Caution Colors */
+  --stellar-link-caution-default: var(--stellar-yellow-80);
+  --stellar-link-caution-hover: var(--stellar-yellow-90);
+  --stellar-link-caution-press: var(--stellar-yellow-90);
+  --stellar-link-caution-disabled: var(--stellar-yellow-50);
+
+  /* Link Info Colors */
+  --stellar-link-info-default: var(--stellar-blue-70);
+  --stellar-link-info-hover: var(--stellar-blue-80);
+  --stellar-link-info-press: var(--stellar-blue-90);
+  --stellar-link-info-disabled: var(--stellar-blue-30);
+
+  /* Link Neutral Colors */
+  --stellar-link-neutral-default: var(--stellar-gray-85);
+  --stellar-link-neutral-hover: var(--stellar-gray-90);
+  --stellar-link-neutral-press: var(--stellar-gray-90);
+  --stellar-link-neutral-disabled: var(--stellar-gray-60);
+
+  /* Icon Colors */
+  --stellar-icon-default: var(--stellar-gray-70);
+  --stellar-icon-subtle: var(--stellar-gray-40);
+
+  /* Selected States */
+  --stellar-selected-text: var(--stellar-blue-40);
+  --stellar-selected-bg: var(--stellar-blue-05);
+  --stellar-selected-ui: var(--stellar-blue-50);
+  --stellar-selected-hovered-text: var(--stellar-blue-50);
+  --stellar-selected-hovered-bg: var(--stellar-blue-10);
+  --stellar-selected-hovered-ui: var(--stellar-blue-60);
+
+  /* Disabled States */
+  --stellar-disabled-text: var(--stellar-gray-50);
+  --stellar-disabled-bg: var(--stellar-gray-20);
+
+  /* Critical States */
+  --stellar-critical-text: var(--stellar-red-50);
+  --stellar-critical-bg: var(--stellar-red-30);
+  --stellar-critical-ui: var(--stellar-red-50);
+  --stellar-critical-chart: var(--stellar-red-50);
+  --stellar-critical-chart-dim: var(--stellar-red-10);
+
+  /* Caution States */
+  --stellar-caution-text: var(--stellar-yellow-90);
+  --stellar-caution-bg: var(--stellar-yellow-10);
+  --stellar-caution-ui: var(--stellar-yellow-50);
+  --stellar-caution-chart: var(--stellar-yellow-50);
+  --stellar-caution-chart-dim: var(--stellar-yellow-10);
+
+  /* Success States */
+  --stellar-success-text: var(--stellar-green-80);
+  --stellar-success-bg: var(--stellar-green-10);
+  --stellar-success-ui: var(--stellar-green-60);
+  --stellar-success-chart: var(--stellar-green-50);
+  --stellar-success-chart-dim: var(--stellar-green-10);
+
+  /* Info States */
+  --stellar-info-text: var(--stellar-blue-70);
+  --stellar-info-bg: var(--stellar-blue-05);
+  --stellar-info-ui: var(--stellar-blue-50);
+  --stellar-info-chart: var(--stellar-blue-40);
+  --stellar-info-chart-dim: var(--stellar-blue-05);
+
+  /* Neutral States */
+  --stellar-neutral-text: var(--stellar-gray-85);
+  --stellar-neutral-bg: var(--stellar-gray-15);
+  --stellar-neutral-ui: var(--stellar-gray-40);
+  --stellar-neutral-chart: var(--stellar-gray-40);
+  --stellar-neutral-chart-dim: var(--stellar-gray-10);
+
+  /* Active States */
+  --stellar-active-chart: var(--stellar-gray-70);
+  --stellar-active-chart-dim: var(--stellar-gray-20);
+
+  /* Default States */
+  --stellar-default-text: var(--stellar-gray-90);
+  --stellar-default-bg: var(--stellar-gray-20);
+
+  /* Hovered States */
+  --stellar-hovered-text: var(--stellar-gray-90);
+  --stellar-hovered-bg: var(--stellar-gray-30);
+
+  /* Pressed States */
+  --stellar-pressed-text: var(--stellar-gray-90);
+  --stellar-pressed-bg: var(--stellar-gray-40);
+
+  /* Executed Background */
+  --stellar-executed-bg: var(--stellar-blue-05);
+
+  /* Errored Background */
+  --stellar-errored-bg: var(--stellar-red-30);
+
+  /* ========== TYPOGRAPHY ========== */
+
+  /* Font Families */
+  --stellar-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --stellar-font-family-mono: 'Apercu Mono Pro', 'Monaco', 'Menlo', 'Courier New', monospace;
+
+  /* Font Weights */
+  --stellar-font-weight-regular: 400;
+  --stellar-font-weight-medium: 500;
+  --stellar-font-weight-semibold: 600;
+  --stellar-font-weight-bold: 700;
+
+  /* Font Sizes - Primitive */
+  --stellar-font-size-small: 12px;
+  --stellar-font-size-regular: 14px;
+  --stellar-font-size-large: 16px;
+  --stellar-font-size-xlarge: 20px;
+  --stellar-font-size-xxlarge: 28px;
+  --stellar-font-size-xxxlarge: 40px;
+
+  /* Line Heights */
+  --stellar-line-height-small: 16px;
+  --stellar-line-height-regular: 20px;
+  --stellar-line-height-large: 24px;
+  --stellar-line-height-xlarge: 28px;
+  --stellar-line-height-xxlarge: 36px;
+  --stellar-line-height-xxxlarge: 48px;
+
+  /* ========== SPACING ========== */
+
+  /* Base spacing unit: 8px */
+  --stellar-space-1: 4px;   /* 0.5x */
+  --stellar-space-2: 8px;   /* 1x */
+  --stellar-space-3: 12px;  /* 1.5x */
+  --stellar-space-4: 16px;  /* 2x */
+  --stellar-space-5: 20px;  /* 2.5x */
+  --stellar-space-6: 24px;  /* 3x */
+  --stellar-space-7: 28px;  /* 3.5x */
+  --stellar-space-8: 32px;  /* 4x */
+  --stellar-space-10: 40px; /* 5x */
+  --stellar-space-12: 48px; /* 6x */
+  --stellar-space-16: 64px; /* 8x */
+
+  /* ========== BORDER RADIUS ========== */
+
+  --stellar-radius-small: 3px;
+  --stellar-radius-default: 4px;
+  --stellar-radius-medium: 6px;
+  --stellar-radius-large: 8px;
+  --stellar-radius-xlarge: 12px;
+  --stellar-radius-round: 10px;
+  --stellar-radius-pill: 9999px;
+  --stellar-radius-circle: 50%;
+
+  /* ========== SHADOWS ========== */
+
+  --stellar-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --stellar-shadow-md: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --stellar-shadow-lg: 0 2px 4px rgba(0, 0, 0, 0.08);
+  --stellar-shadow-xl: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --stellar-shadow-2xl: 0 10px 40px rgba(0, 0, 0, 0.3);
+
+  /* Focus Shadow */
+  --stellar-shadow-focus: 0 0 0 3px rgba(7, 132, 222, 0.1);
+
+  /* ========== TRANSITIONS ========== */
+
+  --stellar-transition-fast: 0.15s ease;
+  --stellar-transition-default: 0.2s ease;
+  --stellar-transition-slow: 0.3s ease;
+
+  /* ========== Z-INDEX ========== */
+
+  --stellar-z-dropdown: 1000;
+  --stellar-z-sticky: 100;
+  --stellar-z-modal: 10000;
+  --stellar-z-toast: 10001;
+  --stellar-z-tooltip: 10002;
+}

@@ -567,7 +567,6 @@ async function loadWarehousesAndRoles() {
     hideLoading();
 
   } catch (error) {
-    console.error('Full error in loadWarehousesAndRoles:', error);
     hideLoading();
     throw new Error(`Failed to load roles: ${error.message}`);
   }
@@ -1042,15 +1041,8 @@ async function loadViewMetadata(fullyQualifiedName) {
     // Debug: Show filter details if any exist
     if (metadata.nonEnforcedFilters && metadata.nonEnforcedFilters.length > 0) {
       metadata.nonEnforcedFilters.forEach((filter, i) => {
-        console.log(`Filter ${i + 1}:`, {
-          name: filter.name,
-          expression: filter.expression,
-          description: filter.description
-        });
       });
     } else {
-      console.log('This semantic view does not have any recommended filters defined.');
-      console.log('Filters would appear as guidance to help users query more efficiently.');
     }
 
     // Switch to pivot configuration panel
@@ -1075,7 +1067,6 @@ async function loadViewMetadata(fullyQualifiedName) {
 
     // Make the metadata section visible
     document.getElementById('view-metadata-section').classList.remove('hidden');
-    console.log('✓ Metadata section now visible');
 
     // Restore panel collapsed states
     restoreFieldListPanelState();
@@ -1428,7 +1419,6 @@ async function handleCreatePivot() {
     // Check if it's a SQL syntax error
     if (errorMessage.includes('SQL compilation error') || errorMessage.includes('syntax error')) {
       console.error('=== SQL SYNTAX ERROR ===');
-      console.error('Check the "GENERATED SQL QUERY" log above to see what was sent to Snowflake');
 
       // Special handling for semantic view "same entity" error
       if (errorMessage.includes('same entity') || errorMessage.includes('FACTS and DIMENSIONS')) {
@@ -1535,8 +1525,6 @@ async function findLastSnowflakePivot() {
 }
 
 async function handleUpdatePivot() {
-  console.log('=== UPDATE BUTTON CLICKED ===');
-  console.log('Current state.lastPivotTable:', state.lastPivotTable);
 
   if (!state.viewMetadata) {
     showError('Please select a semantic view first');
@@ -1545,13 +1533,10 @@ async function handleUpdatePivot() {
 
   // Check if we have data table info in state
   if (!state.lastPivotTable || !state.lastPivotTable.tableName) {
-    console.error('No data table info in state');
     showError('No data table to update. Please create a data table first.');
     return;
   }
 
-  console.log('Updating table:', state.lastPivotTable.tableName);
-  console.log('On sheet:', state.lastPivotTable.dataSheetName);
 
   // Check if pivot table mode is enabled
   const enablePivotCheckbox = document.getElementById('enable-pivot-table');
@@ -1560,7 +1545,6 @@ async function handleUpdatePivot() {
   // Check if a pivot table currently exists
   const hasPivotTable = !!(state.lastPivotTable?.pivotTableName && state.lastPivotTable?.pivotSheetName);
 
-  console.log('Update mode:', { isPivotMode, hasPivotTable });
 
   try {
     showLoading('Preparing query...');
@@ -1606,7 +1590,6 @@ async function handleUpdatePivot() {
     const facts = allFields.filter(f => f.type === 'fact').map(f => f.name);
     const adhocMetrics = AdhocMetricsManager.getAdhocMetrics();
 
-    console.log('=== UPDATE DATA TABLE: Fields ===');
 
     const totalFields = allFields.length + adhocMetrics.length;
 
@@ -1656,7 +1639,6 @@ async function handleUpdatePivot() {
     // Check if it's a SQL syntax error
     if (errorMessage.includes('SQL compilation error') || errorMessage.includes('syntax error')) {
       console.error('=== SQL SYNTAX ERROR ===');
-      console.error('Check the "GENERATED SQL QUERY" log above to see what was sent to Snowflake');
 
       // Special handling for semantic view "same entity" error
       if (errorMessage.includes('same entity') || errorMessage.includes('FACTS and DIMENSIONS')) {
@@ -1689,16 +1671,12 @@ async function updateExistingDataTable(result) {
     const workbook = context.workbook;
 
     try {
-      console.log('=== UPDATING DATA TABLE ===');
-      console.log('State info:', state.lastPivotTable);
 
       // Validate state info
       if (!state.lastPivotTable || !state.lastPivotTable.dataSheetName || !state.lastPivotTable.tableName) {
         throw new Error('No data table information found. Please create a data table first.');
       }
 
-      console.log('Looking for sheet:', state.lastPivotTable.dataSheetName);
-      console.log('Looking for table:', state.lastPivotTable.tableName);
 
       // Get the data sheet and table
       const dataSheet = workbook.worksheets.getItemOrNullObject(state.lastPivotTable.dataSheetName);
@@ -1712,7 +1690,6 @@ async function updateExistingDataTable(result) {
         throw new Error(`Data sheet "${sheetName}" not found. It may have been deleted. Please create a new data table.`);
       }
 
-      console.log('Data sheet found, updating data...');
 
       // Get the existing table
       const oldTable = dataSheet.tables.getItemOrNullObject(state.lastPivotTable.tableName);
@@ -1720,12 +1697,9 @@ async function updateExistingDataTable(result) {
 
       // Delete the old table if it exists
       if (!oldTable.isNullObject) {
-        console.log('Deleting old table...');
         oldTable.delete();
         await context.sync();
-        console.log('Old table deleted');
       } else {
-        console.log('No existing table found, will create new one');
       }
 
       // Clear all data from the sheet
@@ -1778,7 +1752,6 @@ async function updateExistingDataTable(result) {
       }
 
       await context.sync();
-      console.log('Data written to sheet');
 
       // Create new table
       const tableRange = dataSheet.getUsedRange();
@@ -1787,7 +1760,6 @@ async function updateExistingDataTable(result) {
       table.style = 'TableStyleMedium2';
 
       await context.sync();
-      console.log('New table created');
 
       // Auto-fit columns
       tableRange.format.autofitColumns();
@@ -1797,7 +1769,6 @@ async function updateExistingDataTable(result) {
 
       await context.sync();
 
-      console.log('✅ Data table updated successfully!');
     } catch (error) {
       console.error('Error updating data table:', error);
       throw new Error(`Failed to update data table: ${error.message}. You may need to create a new data table instead.`);
@@ -1810,12 +1781,9 @@ async function updateExistingPivotTable() {
     const workbook = context.workbook;
 
     try {
-      console.log('=== UPDATING PIVOT TABLE ===');
-      console.log('Pivot state info:', state.lastPivotTable);
 
       // Validate state info
       if (!state.lastPivotTable || !state.lastPivotTable.pivotTableName || !state.lastPivotTable.pivotSheetName) {
-        console.log('No pivot table info found, skipping pivot update');
         return;
       }
 
@@ -1834,10 +1802,8 @@ async function updateExistingPivotTable() {
 
       // Delete the old pivot table if it exists
       if (!oldPivotTable.isNullObject) {
-        console.log('Deleting old pivot table...');
         oldPivotTable.delete();
         await context.sync();
-        console.log('Old pivot table deleted');
       }
 
       // Get the data table
@@ -1890,7 +1856,6 @@ async function updateExistingPivotTable() {
 
       await context.sync();
 
-      console.log('✅ Pivot table updated successfully!');
     } catch (error) {
       console.error('Error updating pivot table:', error);
       throw new Error(`Failed to update pivot table: ${error.message}`);
@@ -1908,7 +1873,6 @@ async function createPivotTableFromExistingData(dropZones) {
     const workbook = context.workbook;
 
     try {
-      console.log('=== CREATING PIVOT TABLE FROM EXISTING DATA ===');
 
       // Validate state info
       if (!state.lastPivotTable || !state.lastPivotTable.dataSheetName || !state.lastPivotTable.tableName) {
@@ -1929,7 +1893,6 @@ async function createPivotTableFromExistingData(dropZones) {
       const pivotTable = workbook.pivotTables.add(pivotTableName, table, pivotSheet.getRange('A1'));
       await context.sync();
 
-      console.log('Pivot table created, configuring fields...');
 
       // Add row fields from drop zones
       if (dropZones.rows && dropZones.rows.length > 0) {
@@ -1974,14 +1937,12 @@ async function createPivotTableFromExistingData(dropZones) {
         position: 'A1'
       };
 
-      console.log('Updated state with pivot table info:', state.lastPivotTable);
 
       // Activate the pivot sheet
       pivotSheet.activate();
 
       await context.sync();
 
-      console.log('✅ Pivot table created successfully from existing data!');
     } catch (error) {
       console.error('Error creating pivot table:', error);
       throw new Error(`Failed to create pivot table: ${error.message}`);
@@ -2017,7 +1978,6 @@ async function findNextPivotPosition(context, pivotSheet) {
 
   if (usedRangeOrNull.isNullObject) {
     // Sheet is empty, start at A3
-    console.log('Sheet is empty, starting at A3');
     return 'A3';
   }
 
@@ -2029,14 +1989,6 @@ async function findNextPivotPosition(context, pivotSheet) {
   const lastColumn = usedRange.columnIndex + usedRange.columnCount;
   const lastRow = usedRange.rowIndex + usedRange.rowCount;
 
-  console.log('Used range info:', {
-    columnIndex: usedRange.columnIndex,
-    columnCount: usedRange.columnCount,
-    lastColumn: lastColumn,
-    rowIndex: usedRange.rowIndex,
-    rowCount: usedRange.rowCount,
-    lastRow: lastRow
-  });
 
   // Position new pivot to the right with 2 columns padding
   // If we're beyond column AA (column 26), start a new row below
@@ -2046,13 +1998,11 @@ async function findNextPivotPosition(context, pivotSheet) {
     // Place to the right
     const newColumnLetter = getColumnLetter(lastColumn + 2);
     const position = `${newColumnLetter}3`;
-    console.log(`Placing pivot to the right at ${position}`);
     return position;
   } else {
     // Start a new row below with 3 rows padding
     const newRow = lastRow + 3;
     const position = `A${newRow}`;
-    console.log(`Placing pivot on new row at ${position}`);
     return position;
   }
 }
@@ -2152,9 +2102,7 @@ async function writeToExcelAsDataTable(result, customSheetName = null) {
       tableName: tableName,
       position: null
     };
-    console.log('Saved data table info to state:', state.lastPivotTable);
 
-    console.log('✅ Data table created successfully!');
   });
 }
 
@@ -2265,7 +2213,6 @@ async function writeToExcelWithDataAndPivot(result, viewName, dropZones) {
       position: 'A1'
     };
 
-    console.log('✅ Data sheet and pivot table created successfully!');
   });
 }
 
@@ -2307,16 +2254,13 @@ async function writeToExcelWithPivot(result) {
 
     if (pivotSheet.isNullObject) {
       // Create the shared sheet if it doesn't exist
-      console.log('Creating shared pivot sheet:', sharedPivotSheetName);
       pivotSheet = workbook.worksheets.add(sharedPivotSheetName);
       await context.sync();
     } else {
-      console.log('Using existing shared pivot sheet:', sharedPivotSheetName);
     }
 
     // Step 4: Find the next available position on the sheet
     const position = await findNextPivotPosition(context, pivotSheet);
-    console.log('Positioning new pivot at:', position);
 
     // Step 4.5: Add a label above the pivot table
     const labelRow = parseInt(position.match(/\d+/)[0]) - 1; // One row above the pivot
@@ -2347,10 +2291,8 @@ async function writeToExcelWithPivot(result) {
       tableName: tableName,
       position: position
     };
-    console.log('Saved pivot table info to state:', state.lastPivotTable);
 
     // Step 5: Configure PivotTable based on drop zones
-    console.log('Configuring PivotTable with drop zones:', state.dropZones);
 
     // Add fields to ROWS
     if (state.dropZones.rows && state.dropZones.rows.length > 0) {
@@ -2358,7 +2300,6 @@ async function writeToExcelWithPivot(result) {
         try {
           const hierarchy = pivotTable.hierarchies.getItem(field.name);
           pivotTable.rowHierarchies.add(hierarchy);
-          console.log(`Added ${field.name} to rows`);
         } catch (err) {
           console.warn(`Could not add ${field.name} to rows:`, err);
         }
@@ -2373,7 +2314,6 @@ async function writeToExcelWithPivot(result) {
         try {
           const hierarchy = pivotTable.hierarchies.getItem(field.name);
           pivotTable.columnHierarchies.add(hierarchy);
-          console.log(`Added ${field.name} to columns`);
         } catch (err) {
           console.warn(`Could not add ${field.name} to columns:`, err);
         }
@@ -2400,7 +2340,6 @@ async function writeToExcelWithPivot(result) {
             dataHierarchy.summarizeBy = Excel.AggregationFunction.count;
           }
 
-          console.log(`Added ${field.name} to values`);
         } catch (err) {
           console.warn(`Could not add ${field.name} to values:`, err);
         }
@@ -2415,7 +2354,6 @@ async function writeToExcelWithPivot(result) {
 
     await context.sync();
 
-    console.log('✅ PivotTable created successfully!');
   });
 }
 
@@ -2424,8 +2362,6 @@ async function updateExistingPivot(result) {
     const workbook = context.workbook;
 
     try {
-      console.log('=== UPDATING PIVOT TABLE ===');
-      console.log('Looking for:', state.lastPivotTable);
 
       // First, verify all components exist
       const dataSheet = workbook.worksheets.getItemOrNullObject(state.lastPivotTable.dataSheetName);
@@ -2445,7 +2381,6 @@ async function updateExistingPivot(result) {
         throw new Error(`Pivot table "${state.lastPivotTable.pivotTableName}" not found. It may have been deleted.`);
       }
 
-      console.log('All components found, proceeding with update...');
 
       // Clear existing data in the data sheet
       const usedRange = dataSheet.getUsedRange();
@@ -2464,7 +2399,6 @@ async function updateExistingPivot(result) {
       }
 
       await context.sync();
-      console.log('Data written to sheet');
 
       // Delete the old table and create a new one with the same name
       const oldTable = dataSheet.tables.getItemOrNullObject(state.lastPivotTable.tableName);
@@ -2473,7 +2407,6 @@ async function updateExistingPivot(result) {
       if (!oldTable.isNullObject) {
         oldTable.delete();
         await context.sync();
-        console.log('Old table deleted');
       }
 
       // Create new table with same name
@@ -2483,17 +2416,14 @@ async function updateExistingPivot(result) {
       table.style = 'TableStyleMedium2';
 
       await context.sync();
-      console.log('New table created');
 
       // Delete the old pivot table and create a new one at the same position
-      console.log('Deleting old pivot table...');
       pivotTable.delete();
       await context.sync();
 
       // Note: We don't clear the entire sheet since there may be other pivots on it
 
       // Create a new pivot table with the same name at the same position
-      console.log('Creating new pivot table with updated configuration at:', state.lastPivotTable.position);
       const newPivotTable = workbook.pivotTables.add(
         state.lastPivotTable.pivotTableName,
         table,
@@ -2502,7 +2432,6 @@ async function updateExistingPivot(result) {
       await context.sync();
 
       // Configure the new pivot table based on current drop zones
-      console.log('Configuring pivot table with drop zones:', state.dropZones);
 
       // Add fields to ROWS
       if (state.dropZones.rows && state.dropZones.rows.length > 0) {
@@ -2510,7 +2439,6 @@ async function updateExistingPivot(result) {
           try {
             const hierarchy = newPivotTable.hierarchies.getItem(field.name);
             newPivotTable.rowHierarchies.add(hierarchy);
-            console.log(`Added ${field.name} to rows`);
           } catch (err) {
             console.warn(`Could not add ${field.name} to rows:`, err);
           }
@@ -2524,7 +2452,6 @@ async function updateExistingPivot(result) {
           try {
             const hierarchy = newPivotTable.hierarchies.getItem(field.name);
             newPivotTable.columnHierarchies.add(hierarchy);
-            console.log(`Added ${field.name} to columns`);
           } catch (err) {
             console.warn(`Could not add ${field.name} to columns:`, err);
           }
@@ -2549,7 +2476,6 @@ async function updateExistingPivot(result) {
               dataHierarchy.summarizeBy = Excel.AggregationFunction.count;
             }
 
-            console.log(`Added ${field.name} to values`);
           } catch (err) {
             console.warn(`Could not add ${field.name} to values:`, err);
           }
@@ -2561,7 +2487,6 @@ async function updateExistingPivot(result) {
       pivotSheet.activate();
       await context.sync();
 
-      console.log('✅ PivotTable updated successfully!');
     } catch (error) {
       console.error('Error updating pivot table:', error);
       throw new Error(`Failed to update pivot table: ${error.message}. You may need to create a new pivot table instead.`);
@@ -2673,7 +2598,6 @@ function displayRecommendedFilters(filters) {
     </div>
   `).join('');
 
-  console.log(`Displayed ${filters.length} recommended filters`);
 }
 
 function setupFilterHandlers() {
@@ -2776,7 +2700,6 @@ function addCustomFilter() {
       valuesTextbox.placeholder = 'Click to select values...';
       valuesTextbox.title = 'Click to select values';
 
-      console.log(`Loaded ${distinctValues.length} distinct values for ${fieldName} (type: ${dataType})`);
     } catch (error) {
       operatorSelect.innerHTML = '<option value="">Error</option>';
       operatorSelect.disabled = true;
@@ -3057,7 +2980,6 @@ function displayUnifiedFieldList(metadata) {
   // Sort alphabetically
   allFields.sort((a, b) => a.name.localeCompare(b.name));
 
-  console.log(`Displaying ${allFields.length} fields in unified list`);
 
   container.innerHTML = allFields.map(field => `
     <li class="unified-field-item"
@@ -3134,7 +3056,6 @@ async function handleFieldCheckboxChange(event) {
         // Update state
         await updateDropZones();
 
-        console.log(`Added ${fieldData.name} to ${targetZone} via checkbox`);
       }
     }
   } else {
@@ -3152,7 +3073,6 @@ async function handleFieldCheckboxChange(event) {
     // Update state
     await updateDropZones();
 
-    console.log(`Removed ${fieldData.name} from all zones via checkbox`);
   }
 }
 
@@ -3245,7 +3165,6 @@ function setupDragAndDrop() {
         // Check if field already exists in this zone
         const existingChip = zone.querySelector(`[data-chip-field="${fieldData.name}"]`);
         if (existingChip) {
-          console.log('Field already in this zone');
           return;
         }
 
@@ -3269,9 +3188,7 @@ function setupDragAndDrop() {
         // Update state
         await updateDropZones();
 
-        console.log(`Dropped ${fieldData.name} into ${zoneName}`);
       } catch (error) {
-        console.error('Error handling drop:', error);
         showError('Failed to add field: ' + error.message);
       }
     });
@@ -3371,8 +3288,6 @@ async function updateDropZones() {
     state.queryMode = null;
   }
 
-  console.log('Updated drop zones:', state.dropZones);
-  console.log('Query mode:', state.queryMode);
 
   // Show warning if facts are being used
   showFactsWarningIfNeeded();
@@ -3609,7 +3524,6 @@ async function isDimensionAllowedForMetric(dimensionName, metricName) {
     const cacheKey = `${metricName}`;
     if (!state.allowedDimensionsCache[cacheKey]) {
       const fetchMsg = `    🔄 Fetching allowed dimensions for "${metricName}" from Snowflake...`;
-      console.log(`      ${fetchMsg}`);
 
       // Fetch allowed dimensions for this metric
       const allowedDims = await SnowflakeAPI.getDimensionsForMetric(
@@ -3619,24 +3533,19 @@ async function isDimensionAllowedForMetric(dimensionName, metricName) {
       state.allowedDimensionsCache[cacheKey] = allowedDims.map(d => d.name);
 
       const cacheMsg = `    ✅ Cached ${allowedDims.length} allowed dimensions: ${allowedDims.map(d => d.name).join(', ')}`;
-      console.log(`      ${cacheMsg}`);
     } else {
-      console.log(`      📦 Using cached dimensions for metric "${metricName}"`);
     }
 
     const allowedDimensions = state.allowedDimensionsCache[cacheKey];
     const isAllowed = allowedDimensions.includes(dimensionName);
     const checkResultMsg = `    ${isAllowed ? '✅' : '❌'} "${dimensionName}" ${isAllowed ? 'IS' : 'IS NOT'} in allowed list [${allowedDimensions.join(', ')}]`;
-    console.log(`      ${checkResultMsg}`);
 
     return isAllowed;
   } catch (error) {
     const errorMsg = `    ⚠️ ERROR checking "${dimensionName}" + "${metricName}": ${error.message}`;
-    console.error(`      ${errorMsg}`, error);
 
     // If we can't check, allow it (fail open)
     const failOpenMsg = `    ⚠️ FAIL OPEN - allowing "${dimensionName}" with "${metricName}"`;
-    console.warn(`      ${failOpenMsg}`);
     return true;
   }
 }
@@ -3644,7 +3553,6 @@ async function isDimensionAllowedForMetric(dimensionName, metricName) {
 async function updateFieldListDisabledStates() {
   const fieldList = document.getElementById('unified-field-list');
   if (!fieldList) {
-    console.warn('⚠️ updateFieldListDisabledStates: Field list not found');
     return;
   }
 
@@ -3678,7 +3586,6 @@ async function updateFieldListDisabledStates() {
     viewMetadataDimensions: state.viewMetadata?.dimensions?.length || 0,
     viewMetadataFacts: state.viewMetadata?.facts?.length || 0
   };
-  console.log('🔍 updateFieldListDisabledStates:', debugInfo);
 
   // Debug: Show how many dimensions/facts have table info
   if (state.viewMetadata) {
@@ -3690,7 +3597,6 @@ async function updateFieldListDisabledStates() {
   const factTables = new Set();
   facts.forEach(f => {
     const factMeta = state.viewMetadata.facts.find(fm => fm.name === f.name);
-    console.log(`  📊 Fact "${f.name}" metadata:`, factMeta);
     if (factMeta && factMeta.logicalTable) {
       factTables.add(factMeta.logicalTable);
     } else if (factMeta) {
@@ -3701,7 +3607,6 @@ async function updateFieldListDisabledStates() {
   const dimensionTables = new Set();
   dimensions.forEach(d => {
     const dimMeta = state.viewMetadata.dimensions.find(dm => dm.name === d.name);
-    console.log(`  📊 Dimension "${d.name}" metadata:`, dimMeta);
     if (dimMeta && dimMeta.logicalTable) {
       dimensionTables.add(dimMeta.logicalTable);
     } else if (dimMeta) {
@@ -3745,7 +3650,6 @@ async function updateFieldListDisabledStates() {
     // NEW: When facts are selected, block dimensions from other tables
     if (fieldType === 'dimension' && hasFacts && factTables.size > 0) {
       const checkMsg = `🔍 Checking dimension "${fieldName}" with facts from tables: ${Array.from(factTables).join(', ')}`;
-      console.log(`  ${checkMsg}`);
 
       const dimMeta = state.viewMetadata.dimensions.find(dm => dm.name === fieldName);
       if (dimMeta && dimMeta.logicalTable) {
@@ -3755,10 +3659,8 @@ async function updateFieldListDisabledStates() {
           disabledReason = `When using facts from '${tableNames}', dimensions must be from the same table. This dimension is from '${dimMeta.logicalTable}'.`;
 
           const disableMsg = `❌ DISABLED: dimension "${fieldName}" from table '${dimMeta.logicalTable}' (facts are from '${tableNames}')`;
-          console.log(`    ${disableMsg}`);
         } else {
           const compatMsg = `✅ Compatible: dimension "${fieldName}" from table '${dimMeta.logicalTable}' matches fact table`;
-          console.log(`    ${compatMsg}`);
         }
       }
     }
@@ -3766,7 +3668,6 @@ async function updateFieldListDisabledStates() {
     // NEW: When facts are selected, block facts from other tables
     if (fieldType === 'fact' && hasFacts && factTables.size > 0) {
       const checkMsg = `🔍 Checking fact "${fieldName}" with existing facts from tables: ${Array.from(factTables).join(', ')}`;
-      console.log(`  ${checkMsg}`);
 
       const factMeta = state.viewMetadata.facts.find(fm => fm.name === fieldName);
       if (factMeta && factMeta.logicalTable) {
@@ -3776,10 +3677,8 @@ async function updateFieldListDisabledStates() {
           disabledReason = `Facts must come from the same table. Selected facts are from '${tableNames}', but this fact is from '${factMeta.logicalTable}'.`;
 
           const disableMsg = `❌ DISABLED: fact "${fieldName}" from table '${factMeta.logicalTable}' (selected facts are from '${tableNames}')`;
-          console.log(`    ${disableMsg}`);
         } else {
           const compatMsg = `✅ Compatible: fact "${fieldName}" from table '${factMeta.logicalTable}' matches selected facts`;
-          console.log(`    ${compatMsg}`);
         }
       }
     }
@@ -3789,7 +3688,6 @@ async function updateFieldListDisabledStates() {
     // and have equal or lower granularity (validated via SHOW SEMANTIC DIMENSIONS FOR METRIC)
     if (fieldType === 'dimension' && hasMetrics && !shouldDisable) {
       const checkMsg = `🔍 Checking dimension "${fieldName}" with ${metrics.length} metrics`;
-      console.log(`  ${checkMsg}`);
 
       // Check if dimension is compatible with all metrics
       let compatibleWithAll = true;
@@ -3797,7 +3695,6 @@ async function updateFieldListDisabledStates() {
       for (const metric of metrics) {
         const allowed = await isDimensionAllowedForMetric(fieldName, metric.name);
         const resultMsg = `  → "${fieldName}" + "${metric.name}": ${allowed ? '✅ Compatible' : '❌ Incompatible'}`;
-        console.log(`    ${resultMsg}`);
         if (!allowed) {
           compatibleWithAll = false;
           incompatibleMetric = metric.name;
@@ -3808,10 +3705,8 @@ async function updateFieldListDisabledStates() {
         shouldDisable = true;
         disabledReason = `Dimension "${fieldName}" cannot be used with metric "${incompatibleMetric}". The dimension's logical table must be related to the metric's table and have equal or lower granularity.`;
         const disableMsg = `❌ DISABLED: dimension "${fieldName}" (incompatible with "${incompatibleMetric}")`;
-        console.log(`    ${disableMsg}`);
       } else {
         const compatMsg = `✅ Compatible: dimension "${fieldName}" works with all metrics`;
-        console.log(`    ${compatMsg}`);
       }
     }
 
@@ -3819,7 +3714,6 @@ async function updateFieldListDisabledStates() {
     // This ensures bidirectional validation: dimensions check metrics, and metrics check dimensions
     if (fieldType === 'metric' && hasDimensions && !hasFacts && !shouldDisable) {
       const checkMsg = `🔍 Checking metric "${fieldName}" with ${dimensions.length} dimensions`;
-      console.log(`  ${checkMsg}`);
 
       // Check if this metric is compatible with all selected dimensions
       let compatibleWithAll = true;
@@ -3827,7 +3721,6 @@ async function updateFieldListDisabledStates() {
       for (const dimension of dimensions) {
         const allowed = await isDimensionAllowedForMetric(dimension.name, fieldName);
         const resultMsg = `  → "${fieldName}" + "${dimension.name}": ${allowed ? '✅ Compatible' : '❌ Incompatible'}`;
-        console.log(`    ${resultMsg}`);
         if (!allowed) {
           compatibleWithAll = false;
           incompatibleDimension = dimension.name;
@@ -3838,10 +3731,8 @@ async function updateFieldListDisabledStates() {
         shouldDisable = true;
         disabledReason = `Metric "${fieldName}" cannot be used with dimension "${incompatibleDimension}". The metric's logical table must be related to the dimension's table.`;
         const disableMsg = `❌ DISABLED: metric "${fieldName}" (incompatible with "${incompatibleDimension}")`;
-        console.log(`    ${disableMsg}`);
       } else {
         const compatMsg = `✅ Compatible: metric "${fieldName}" works with all dimensions`;
-        console.log(`    ${compatMsg}`);
       }
     }
 
@@ -3849,7 +3740,6 @@ async function updateFieldListDisabledStates() {
     // Rule: Facts require dimensions from the SAME table. If dimensions are from multiple tables, disable all facts.
     if (fieldType === 'fact' && hasDimensions && !hasMetrics && !hasFacts && !shouldDisable) {
       const checkMsg = `🔍 Checking fact "${fieldName}" with dimensions from tables: ${Array.from(dimensionTables).join(', ')}`;
-      console.log(`  ${checkMsg}`);
 
       const factMeta = state.viewMetadata.facts.find(fm => fm.name === fieldName);
       if (factMeta && factMeta.logicalTable) {
@@ -3860,7 +3750,6 @@ async function updateFieldListDisabledStates() {
           disabledReason = `Cannot use facts when dimensions are from multiple tables (${dimTableNames}). Facts require all dimensions to be from the same table. Consider using Metrics instead.`;
 
           const disableMsg = `❌ DISABLED: fact "${fieldName}" (dimensions are from multiple tables: ${dimTableNames})`;
-          console.log(`    ${disableMsg}`);
         }
         // If dimensions are from one table, only allow facts from that table
         else if (dimensionTables.size === 1) {
@@ -3870,10 +3759,8 @@ async function updateFieldListDisabledStates() {
             disabledReason = `Fact "${fieldName}" is from table '${factMeta.logicalTable}', but selected dimensions are from table '${dimTableName}'. Facts and dimensions must be from the same table.`;
 
             const disableMsg = `❌ DISABLED: fact "${fieldName}" from table '${factMeta.logicalTable}' (dimensions are from '${dimTableName}')`;
-            console.log(`    ${disableMsg}`);
           } else {
             const compatMsg = `✅ Compatible: fact "${fieldName}" from table '${factMeta.logicalTable}' matches dimension table`;
-            console.log(`    ${compatMsg}`);
           }
         }
       }
@@ -3899,7 +3786,6 @@ async function updateFieldListDisabledStates() {
     facts: disabledCount.fact,
     total: disabledCount.dimension + disabledCount.metric + disabledCount.fact
   };
-  console.log('📊 Summary - Disabled fields:', summary);
 }
 
 // Expose functions and objects globally for inline event handlers

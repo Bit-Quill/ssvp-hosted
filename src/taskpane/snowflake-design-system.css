@@ -3,353 +3,387 @@
  * Derived from Stellar Pages shared on 2026-01-21
  */
 
+/* ========== FONTS ========== */
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../assets/fonts/Inter-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../assets/fonts/Inter-Medium.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../assets/fonts/Inter-SemiBold.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../assets/fonts/Inter-Bold.woff2') format('woff2');
+}
+
 :root {
   /* ========== COLORS ========== */
 
   /* Named Colors */
-  --snowflake-standard-design-color-white: #ffffff;
-  --snowflake-standard-design-color-black: #000000;
+  --sf-std-color-white: #ffffff;
+  --sf-std-color-black: #000000;
 
   /* Gray Scale */
-  --snowflake-standard-design-color-gray-05: #fafbfc;
-  --snowflake-standard-design-color-gray-10: #f5f6f7;
-  --snowflake-standard-design-color-gray-15: #f0f1f3;
-  --snowflake-standard-design-color-gray-20: #e8eaed;
-  --snowflake-standard-design-color-gray-30: #d4d7dd;
-  --snowflake-standard-design-color-gray-40: #bec3cc;
-  --snowflake-standard-design-color-gray-50: #98a0ad;
-  --snowflake-standard-design-color-gray-55: #8891a0;
-  --snowflake-standard-design-color-gray-60: #6f7988;
-  --snowflake-standard-design-color-gray-70: #535d6e;
-  --snowflake-standard-design-color-gray-80: #3d4657;
-  --snowflake-standard-design-color-gray-85: #2e3543;
-  --snowflake-standard-design-color-gray-90: #242a35;
-  --snowflake-standard-design-color-gray-95: #1b1f29;
+  --sf-std-color-gray-05: #fafbfc;
+  --sf-std-color-gray-10: #f5f6f7;
+  --sf-std-color-gray-15: #f0f1f3;
+  --sf-std-color-gray-20: #e8eaed;
+  --sf-std-color-gray-30: #d4d7dd;
+  --sf-std-color-gray-40: #bec3cc;
+  --sf-std-color-gray-50: #98a0ad;
+  --sf-std-color-gray-55: #8891a0;
+  --sf-std-color-gray-60: #6f7988;
+  --sf-std-color-gray-70: #535d6e;
+  --sf-std-color-gray-80: #3d4657;
+  --sf-std-color-gray-85: #2e3543;
+  --sf-std-color-gray-90: #242a35;
+  --sf-std-color-gray-95: #1b1f29;
 
   /* Blues */
-  --snowflake-standard-design-color-blue-00: #f0f8ff;
-  --snowflake-standard-design-color-blue-05: #e3f2fd;
-  --snowflake-standard-design-color-blue-10: #bbdefb;
-  --snowflake-standard-design-color-blue-20: #6db5f0;
-  --snowflake-standard-design-color-blue-30: #4ba7ed;
-  --snowflake-standard-design-color-blue-40: #2a99eb;
-  --snowflake-standard-design-color-blue-50: #0784de;
-  --snowflake-standard-design-color-blue-60: #006abc;
-  --snowflake-standard-design-color-blue-70: #005198;
-  --snowflake-standard-design-color-blue-80: #003e7a;
-  --snowflake-standard-design-color-blue-90: #002b5c;
+  --sf-std-color-blue-00: #f0f8ff;
+  --sf-std-color-blue-05: #e3f2fd;
+  --sf-std-color-blue-10: #bbdefb;
+  --sf-std-color-blue-20: #6db5f0;
+  --sf-std-color-blue-30: #4ba7ed;
+  --sf-std-color-blue-40: #2a99eb;
+  --sf-std-color-blue-50: #0784de;
+  --sf-std-color-blue-60: #006abc;
+  --sf-std-color-blue-70: #005198;
+  --sf-std-color-blue-80: #003e7a;
+  --sf-std-color-blue-90: #002b5c;
 
   /* Greens */
-  --snowflake-standard-design-color-green-00: #e8f8f2;
-  --snowflake-standard-design-color-green-10: #c8edd9;
-  --snowflake-standard-design-color-green-20: #a1e3c0;
-  --snowflake-standard-design-color-green-30: #7bd8a7;
-  --snowflake-standard-design-color-green-40: #56ce8f;
-  --snowflake-standard-design-color-green-50: #31c376;
-  --snowflake-standard-design-color-green-60: #28a563;
-  --snowflake-standard-design-color-green-70: #1f8750;
-  --snowflake-standard-design-color-green-80: #16693e;
-  --snowflake-standard-design-color-green-90: #0d4b2b;
+  --sf-std-color-green-00: #e8f8f2;
+  --sf-std-color-green-10: #c8edd9;
+  --sf-std-color-green-20: #a1e3c0;
+  --sf-std-color-green-30: #7bd8a7;
+  --sf-std-color-green-40: #56ce8f;
+  --sf-std-color-green-50: #31c376;
+  --sf-std-color-green-60: #28a563;
+  --sf-std-color-green-70: #1f8750;
+  --sf-std-color-green-80: #16693e;
+  --sf-std-color-green-90: #0d4b2b;
 
   /* Reds */
-  --snowflake-standard-design-color-red-00: #fff5f5;
-  --snowflake-standard-design-color-red-10: #ffcdd2;
-  --snowflake-standard-design-color-red-20: #fc9397;
-  --snowflake-standard-design-color-red-30: #fa6c72;
-  --snowflake-standard-design-color-red-40: #f8464d;
-  --snowflake-standard-design-color-red-50: #f62028;
-  --snowflake-standard-design-color-red-60: #d91b22;
-  --snowflake-standard-design-color-red-70: #bc161d;
-  --snowflake-standard-design-color-red-80: #9f1217;
-  --snowflake-standard-design-color-red-90: #820d12;
+  --sf-std-color-red-00: #fff5f5;
+  --sf-std-color-red-10: #ffcdd2;
+  --sf-std-color-red-20: #fc9397;
+  --sf-std-color-red-30: #fa6c72;
+  --sf-std-color-red-40: #f8464d;
+  --sf-std-color-red-50: #f62028;
+  --sf-std-color-red-60: #d91b22;
+  --sf-std-color-red-70: #bc161d;
+  --sf-std-color-red-80: #9f1217;
+  --sf-std-color-red-90: #820d12;
 
   /* Yellows */
-  --snowflake-standard-design-color-yellow-00: #fffaeb;
-  --snowflake-standard-design-color-yellow-10: #ffeec2;
-  --snowflake-standard-design-color-yellow-20: #ffe299;
-  --snowflake-standard-design-color-yellow-30: #ffd670;
-  --snowflake-standard-design-color-yellow-40: #ffca47;
-  --snowflake-standard-design-color-yellow-50: #ffbe1e;
-  --snowflake-standard-design-color-yellow-60: #e5a500;
-  --snowflake-standard-design-color-yellow-70: #bf8800;
-  --snowflake-standard-design-color-yellow-80: #996b00;
-  --snowflake-standard-design-color-yellow-90: #734e00;
+  --sf-std-color-yellow-00: #fffaeb;
+  --sf-std-color-yellow-10: #ffeec2;
+  --sf-std-color-yellow-20: #ffe299;
+  --sf-std-color-yellow-30: #ffd670;
+  --sf-std-color-yellow-40: #ffca47;
+  --sf-std-color-yellow-50: #ffbe1e;
+  --sf-std-color-yellow-60: #e5a500;
+  --sf-std-color-yellow-70: #bf8800;
+  --sf-std-color-yellow-80: #996b00;
+  --sf-std-color-yellow-90: #734e00;
 
   /* Violets */
-  --snowflake-standard-design-color-violet-00: #f8f5ff;
-  --snowflake-standard-design-color-violet-10: #e6dcff;
-  --snowflake-standard-design-color-violet-20: #d4c3ff;
-  --snowflake-standard-design-color-violet-30: #c2abff;
-  --snowflake-standard-design-color-violet-40: #b092ff;
-  --snowflake-standard-design-color-violet-50: #9e79ff;
-  --snowflake-standard-design-color-violet-60: #8860e6;
-  --snowflake-standard-design-color-violet-70: #7247cc;
-  --snowflake-standard-design-color-violet-80: #5c2fb3;
-  --snowflake-standard-design-color-violet-90: #461699;
+  --sf-std-color-violet-00: #f8f5ff;
+  --sf-std-color-violet-10: #e6dcff;
+  --sf-std-color-violet-20: #d4c3ff;
+  --sf-std-color-violet-30: #c2abff;
+  --sf-std-color-violet-40: #b092ff;
+  --sf-std-color-violet-50: #9e79ff;
+  --sf-std-color-violet-60: #8860e6;
+  --sf-std-color-violet-70: #7247cc;
+  --sf-std-color-violet-80: #5c2fb3;
+  --sf-std-color-violet-90: #461699;
 
   /* Orange (for Info/Warning states) */
-  --snowflake-standard-design-color-orange-00: #fff4e6;
-  --snowflake-standard-design-color-orange-10: #ffe4c2;
-  --snowflake-standard-design-color-orange-20: #ffd49e;
-  --snowflake-standard-design-color-orange-30: #ffc47a;
-  --snowflake-standard-design-color-orange-40: #ffb456;
-  --snowflake-standard-design-color-orange-50: #ffa432;
-  --snowflake-standard-design-color-orange-60: #e68d1e;
-  --snowflake-standard-design-color-orange-70: #cc7610;
-  --snowflake-standard-design-color-orange-80: #b35f02;
-  --snowflake-standard-design-color-orange-90: #994800;
+  --sf-std-color-orange-00: #fff4e6;
+  --sf-std-color-orange-10: #ffe4c2;
+  --sf-std-color-orange-20: #ffd49e;
+  --sf-std-color-orange-30: #ffc47a;
+  --sf-std-color-orange-40: #ffb456;
+  --sf-std-color-orange-50: #ffa432;
+  --sf-std-color-orange-60: #e68d1e;
+  --sf-std-color-orange-70: #cc7610;
+  --sf-std-color-orange-80: #b35f02;
+  --sf-std-color-orange-90: #994800;
 
   /* Cyan (for Info states) */
-  --snowflake-standard-design-color-cyan-00: #e0fcff;
-  --snowflake-standard-design-color-cyan-10: #aaf4ff;
-  --snowflake-standard-design-color-cyan-20: #74ecff;
-  --snowflake-standard-design-color-cyan-30: #3ee4ff;
-  --snowflake-standard-design-color-cyan-40: #08dcff;
-  --snowflake-standard-design-color-cyan-50: #00d4f7;
-  --snowflake-standard-design-color-cyan-60: #00bcde;
-  --snowflake-standard-design-color-cyan-70: #00a4c4;
-  --snowflake-standard-design-color-cyan-80: #008cab;
-  --snowflake-standard-design-color-cyan-90: #007491;
+  --sf-std-color-cyan-00: #e0fcff;
+  --sf-std-color-cyan-10: #aaf4ff;
+  --sf-std-color-cyan-20: #74ecff;
+  --sf-std-color-cyan-30: #3ee4ff;
+  --sf-std-color-cyan-40: #08dcff;
+  --sf-std-color-cyan-50: #00d4f7;
+  --sf-std-color-cyan-60: #00bcde;
+  --sf-std-color-cyan-70: #00a4c4;
+  --sf-std-color-cyan-80: #008cab;
+  --sf-std-color-cyan-90: #007491;
 
   /* Pink (for Alert states) */
-  --snowflake-standard-design-pink-00: #ffe6f0;
-  --snowflake-standard-design-pink-10: #ffc2db;
-  --snowflake-standard-design-pink-20: #ff9ec6;
-  --snowflake-standard-design-pink-30: #ff7ab1;
-  --snowflake-standard-design-pink-40: #ff569c;
-  --snowflake-standard-design-pink-50: #ff3287;
-  --snowflake-standard-design-pink-60: #e61e73;
-  --snowflake-standard-design-pink-70: #cc0a5f;
-  --snowflake-standard-design-pink-80: #b3004b;
-  --snowflake-standard-design-pink-90: #990037;
+  --sf-std-color-pink-00: #ffe6f0;
+  --sf-std-color-pink-10: #ffc2db;
+  --sf-std-color-pink-20: #ff9ec6;
+  --sf-std-color-pink-30: #ff7ab1;
+  --sf-std-color-pink-40: #ff569c;
+  --sf-std-color-pink-50: #ff3287;
+  --sf-std-color-pink-60: #e61e73;
+  --sf-std-color-pink-70: #cc0a5f;
+  --sf-std-color-pink-80: #b3004b;
+  --sf-std-color-pink-90: #990037;
 
   /* ========== THEME COLORS ========== */
 
   /* Level 1 (Light Theme) */
-  --snowflake-standard-design-level1-bg: var(--snowflake-standard-design-color-white);
-  --snowflake-standard-design-level1-border: var(--snowflake-standard-design-color-gray-30);
+  --sf-std-level1-bg: var(--sf-std-color-white);
+  --sf-std-level1-border: var(--sf-std-color-gray-30);
 
   /* Level 2 (Light Theme) */
-  --snowflake-standard-design-level2-bg: var(--snowflake-standard-design-color-gray-05);
-  --snowflake-standard-design-level2-border: var(--snowflake-standard-design-color-gray-30);
+  --sf-std-level2-bg: var(--sf-std-color-gray-05);
+  --sf-std-level2-border: var(--sf-std-color-gray-30);
 
   /* Level 3 (Light Theme) */
-  --snowflake-standard-design-level3-bg: var(--snowflake-standard-design-color-gray-10);
-  --snowflake-standard-design-level3-border: var(--snowflake-standard-design-color-gray-40);
+  --sf-std-level3-bg: var(--sf-std-color-gray-10);
+  --sf-std-level3-border: var(--sf-std-color-gray-40);
 
   /* Shadow Colors */
-  --snowflake-standard-design-shadow-1: rgba(0, 0, 0, 0.10);
-  --snowflake-standard-design-shadow-2: rgba(0, 0, 0, 0.15);
-  --snowflake-standard-design-shadow-3: rgba(0, 0, 0, 0.20);
+  --sf-std-shadow-1: rgba(0, 0, 0, 0.10);
+  --sf-std-shadow-2: rgba(0, 0, 0, 0.15);
+  --sf-std-shadow-3: rgba(0, 0, 0, 0.20);
 
   /* Overlay */
-  --snowflake-standard-design-overlay: rgba(0, 0, 0, 0.50);
-  --snowflake-standard-design-overlay-light: rgba(0, 0, 0, 0.20);
+  --sf-std-overlay: rgba(0, 0, 0, 0.50);
+  --sf-std-overlay-light: rgba(0, 0, 0, 0.20);
 
   /* Border Colors */
-  --snowflake-standard-design-border-default: var(--snowflake-standard-design-color-gray-30);
-  --snowflake-standard-design-border-bright: var(--snowflake-standard-design-color-gray-40);
-  --snowflake-standard-design-border-hover: var(--snowflake-standard-design-color-gray-50);
-  --snowflake-standard-design-border-disabled: var(--snowflake-standard-design-color-gray-20);
-  --snowflake-standard-design-border-active: var(--snowflake-standard-design-color-blue-50);
-  --snowflake-standard-design-border-focus: var(--snowflake-standard-design-color-blue-50);
+  --sf-std-border-default: var(--sf-std-color-gray-30);
+  --sf-std-border-bright: var(--sf-std-color-gray-40);
+  --sf-std-border-hover: var(--sf-std-color-gray-50);
+  --sf-std-border-disabled: var(--sf-std-color-gray-20);
+  --sf-std-border-active: var(--sf-std-color-blue-50);
+  --sf-std-border-focus: var(--sf-std-color-blue-50);
 
   /* Background Colors */
-  --snowflake-standard-design-bg-null: var(--snowflake-standard-design-color-gray-30);
-  --snowflake-standard-design-bg-additional-info: var(--snowflake-standard-design-color-gray-10);
-  --snowflake-standard-design-bg-row-hover: var(--snowflake-standard-design-color-gray-15);
-  --snowflake-standard-design-bg-component-selected-knockout: var(--snowflake-standard-design-color-white);
+  --sf-std-bg-null: var(--sf-std-color-gray-30);
+  --sf-std-bg-additional-info: var(--sf-std-color-gray-10);
+  --sf-std-bg-row-hover: var(--sf-std-color-gray-15);
+  --sf-std-bg-component-selected-knockout: var(--sf-std-color-white);
 
   /* Text Colors */
-  --snowflake-standard-design-text-primary: var(--snowflake-standard-design-color-gray-85);
-  --snowflake-standard-design-text-secondary: var(--snowflake-standard-design-color-gray-70);
-  --snowflake-standard-design-text-header: var(--snowflake-standard-design-color-gray-85);
+  --sf-std-text-primary: var(--sf-std-color-gray-85);
+  --sf-std-text-secondary: var(--sf-std-color-gray-70);
+  --sf-std-text-header: var(--sf-std-color-gray-85);
 
   /* Link Colors */
-  --snowflake-standard-design-state-link-default: var(--snowflake-standard-design-color-blue-50);
-  --snowflake-standard-design-state-link-hover: var(--snowflake-standard-design-color-blue-60);
-  --snowflake-standard-design-state-link-press: var(--snowflake-standard-design-color-blue-70);
-  --snowflake-standard-design-state-link-disabled: var(--snowflake-standard-design-color-blue-20);
+  --sf-std-state-link-default: var(--sf-std-color-blue-50);
+  --sf-std-state-link-hover: var(--sf-std-color-blue-60);
+  --sf-std-state-link-press: var(--sf-std-color-blue-70);
+  --sf-std-state-link-disabled: var(--sf-std-color-blue-20);
 
   /* Link Success Colors */
-  --snowflake-standard-design-state-link-success-default: var(--snowflake-standard-design-color-green-60);
-  --snowflake-standard-design-state-link-success-hover: var(--snowflake-standard-design-color-green-70);
-  --snowflake-standard-design-state-link-success-press: var(--snowflake-standard-design-color-green-80);
-  --snowflake-standard-design-state-link-success-disabled: var(--snowflake-standard-design-color-green-30);
+  --sf-std-state-link-success-default: var(--sf-std-color-green-60);
+  --sf-std-state-link-success-hover: var(--sf-std-color-green-70);
+  --sf-std-state-link-success-press: var(--sf-std-color-green-80);
+  --sf-std-state-link-success-disabled: var(--sf-std-color-green-30);
 
   /* Link Critical Colors */
-  --snowflake-standard-design-state-link-critical-default: var(--snowflake-standard-design-color-red-50);
-  --snowflake-standard-design-state-link-critical-hover: var(--snowflake-standard-design-color-red-60);
-  --snowflake-standard-design-state-link-critical-press: var(--snowflake-standard-design-color-red-70);
-  --snowflake-standard-design-state-link-critical-disabled: var(--snowflake-standard-design-color-red-30);
+  --sf-std-state-link-critical-default: var(--sf-std-color-red-50);
+  --sf-std-state-link-critical-hover: var(--sf-std-color-red-60);
+  --sf-std-state-link-critical-press: var(--sf-std-color-red-70);
+  --sf-std-state-link-critical-disabled: var(--sf-std-color-red-30);
 
   /* Link Caution Colors */
-  --snowflake-standard-design-state-link-caution-default: var(--snowflake-standard-design-color-yellow-80);
-  --snowflake-standard-design-state-link-caution-hover: var(--snowflake-standard-design-color-yellow-90);
-  --snowflake-standard-design-state-link-caution-press: var(--snowflake-standard-design-color-yellow-90);
-  --snowflake-standard-design-state-link-caution-disabled: var(--snowflake-standard-design-color-yellow-50);
+  --sf-std-state-link-caution-default: var(--sf-std-color-yellow-80);
+  --sf-std-state-link-caution-hover: var(--sf-std-color-yellow-90);
+  --sf-std-state-link-caution-press: var(--sf-std-color-yellow-90);
+  --sf-std-state-link-caution-disabled: var(--sf-std-color-yellow-50);
 
   /* Link Info Colors */
-  --snowflake-standard-design-state-link-info-default: var(--snowflake-standard-design-color-blue-70);
-  --snowflake-standard-design-state-link-info-hover: var(--snowflake-standard-design-color-blue-80);
-  --snowflake-standard-design-state-link-info-press: var(--snowflake-standard-design-color-blue-90);
-  --snowflake-standard-design-state-link-info-disabled: var(--snowflake-standard-design-color-blue-30);
+  --sf-std-state-link-info-default: var(--sf-std-color-blue-70);
+  --sf-std-state-link-info-hover: var(--sf-std-color-blue-80);
+  --sf-std-state-link-info-press: var(--sf-std-color-blue-90);
+  --sf-std-state-link-info-disabled: var(--sf-std-color-blue-30);
 
   /* Link Neutral Colors */
-  --snowflake-standard-design-state-link-neutral-default: var(--snowflake-standard-design-color-gray-85);
-  --snowflake-standard-design-state-link-neutral-hover: var(--snowflake-standard-design-color-gray-90);
-  --snowflake-standard-design-state-link-neutral-press: var(--snowflake-standard-design-color-gray-90);
-  --snowflake-standard-design-state-link-neutral-disabled: var(--snowflake-standard-design-color-gray-60);
+  --sf-std-state-link-neutral-default: var(--sf-std-color-gray-85);
+  --sf-std-state-link-neutral-hover: var(--sf-std-color-gray-90);
+  --sf-std-state-link-neutral-press: var(--sf-std-color-gray-90);
+  --sf-std-state-link-neutral-disabled: var(--sf-std-color-gray-60);
 
   /* Icon Colors */
-  --snowflake-standard-design-icon-default: var(--snowflake-standard-design-color-gray-70);
-  --snowflake-standard-design-icon-subtle: var(--snowflake-standard-design-color-gray-40);
+  --sf-std-icon-default: var(--sf-std-color-gray-70);
+  --sf-std-icon-subtle: var(--sf-std-color-gray-40);
 
   /* Selected States */
-  --snowflake-standard-design-state-selected-text: var(--snowflake-standard-design-color-blue-40);
-  --snowflake-standard-design-state-selected-bg: var(--snowflake-standard-design-color-blue-05);
-  --snowflake-standard-design-state-selected-ui: var(--snowflake-standard-design-color-blue-50);
-  --snowflake-standard-design-state-selected-hovered-text: var(--snowflake-standard-design-color-blue-50);
-  --snowflake-standard-design-state-selected-hovered-bg: var(--snowflake-standard-design-color-blue-10);
-  --snowflake-standard-design-state-selected-hovered-ui: var(--snowflake-standard-design-color-blue-60);
+  --sf-std-state-selected-text: var(--sf-std-color-blue-40);
+  --sf-std-state-selected-bg: var(--sf-std-color-blue-05);
+  --sf-std-state-selected-ui: var(--sf-std-color-blue-50);
+  --sf-std-state-selected-hovered-text: var(--sf-std-color-blue-50);
+  --sf-std-state-selected-hovered-bg: var(--sf-std-color-blue-10);
+  --sf-std-state-selected-hovered-ui: var(--sf-std-color-blue-60);
 
   /* Disabled States */
-  --snowflake-standard-design-state-disabled-text: var(--snowflake-standard-design-color-gray-50);
-  --snowflake-standard-design-state-disabled-bg: var(--snowflake-standard-design-color-gray-20);
+  --sf-std-state-disabled-text: var(--sf-std-color-gray-50);
+  --sf-std-state-disabled-bg: var(--sf-std-color-gray-20);
 
   /* Critical States */
-  --snowflake-standard-design-critical-text: var(--snowflake-standard-design-color-red-50);
-  --snowflake-standard-design-critical-bg: var(--snowflake-standard-design-color-red-30);
-  --snowflake-standard-design-critical-ui: var(--snowflake-standard-design-color-red-50);
-  --snowflake-standard-design-critical-chart: var(--snowflake-standard-design-color-red-50);
-  --snowflake-standard-design-critical-chart-dim: var(--snowflake-standard-design-color-red-10);
+  --sf-std-critical-text: var(--sf-std-color-red-50);
+  --sf-std-critical-bg: var(--sf-std-color-red-30);
+  --sf-std-critical-ui: var(--sf-std-color-red-50);
+  --sf-std-critical-chart: var(--sf-std-color-red-50);
+  --sf-std-critical-chart-dim: var(--sf-std-color-red-10);
 
   /* Caution States */
-  --snowflake-standard-design-caution-text: var(--snowflake-standard-design-color-yellow-90);
-  --snowflake-standard-design-caution-bg: var(--snowflake-standard-design-color-yellow-10);
-  --snowflake-standard-design-caution-ui: var(--snowflake-standard-design-color-yellow-50);
-  --snowflake-standard-design-caution-chart: var(--snowflake-standard-design-color-yellow-50);
-  --snowflake-standard-design-caution-chart-dim: var(--snowflake-standard-design-color-yellow-10);
+  --sf-std-caution-text: var(--sf-std-color-yellow-90);
+  --sf-std-caution-bg: var(--sf-std-color-yellow-10);
+  --sf-std-caution-ui: var(--sf-std-color-yellow-50);
+  --sf-std-caution-chart: var(--sf-std-color-yellow-50);
+  --sf-std-caution-chart-dim: var(--sf-std-color-yellow-10);
 
   /* Success States */
-  --snowflake-standard-design-success-text: var(--snowflake-standard-design-color-green-80);
-  --snowflake-standard-design-success-bg: var(--snowflake-standard-design-color-green-10);
-  --snowflake-standard-design-success-ui: var(--snowflake-standard-design-color-green-60);
-  --snowflake-standard-design-success-chart: var(--snowflake-standard-design-color-green-50);
-  --snowflake-standard-design-success-chart-dim: var(--snowflake-standard-design-color-green-10);
+  --sf-std-success-text: var(--sf-std-color-green-80);
+  --sf-std-success-bg: var(--sf-std-color-green-10);
+  --sf-std-success-ui: var(--sf-std-color-green-60);
+  --sf-std-success-chart: var(--sf-std-color-green-50);
+  --sf-std-success-chart-dim: var(--sf-std-color-green-10);
 
   /* Info States */
-  --snowflake-standard-design-info-text: var(--snowflake-standard-design-color-blue-70);
-  --snowflake-standard-design-info-bg: var(--snowflake-standard-design-color-blue-05);
-  --snowflake-standard-design-info-ui: var(--snowflake-standard-design-color-blue-50);
-  --snowflake-standard-design-info-chart: var(--snowflake-standard-design-color-blue-40);
-  --snowflake-standard-design-info-chart-dim: var(--snowflake-standard-design-color-blue-05);
+  --sf-std-info-text: var(--sf-std-color-blue-70);
+  --sf-std-info-bg: var(--sf-std-color-blue-05);
+  --sf-std-info-ui: var(--sf-std-color-blue-50);
+  --sf-std-info-chart: var(--sf-std-color-blue-40);
+  --sf-std-info-chart-dim: var(--sf-std-color-blue-05);
 
   /* Neutral States */
-  --snowflake-standard-design-neutral-text: var(--snowflake-standard-design-color-gray-85);
-  --snowflake-standard-design-neutral-bg: var(--snowflake-standard-design-color-gray-15);
-  --snowflake-standard-design-neutral-ui: var(--snowflake-standard-design-color-gray-40);
-  --snowflake-standard-design-neutral-chart: var(--snowflake-standard-design-color-gray-40);
-  --snowflake-standard-design-neutral-chart-dim: var(--snowflake-standard-design-color-gray-10);
+  --sf-std-neutral-text: var(--sf-std-color-gray-85);
+  --sf-std-neutral-bg: var(--sf-std-color-gray-15);
+  --sf-std-neutral-ui: var(--sf-std-color-gray-40);
+  --sf-std-neutral-chart: var(--sf-std-color-gray-40);
+  --sf-std-neutral-chart-dim: var(--sf-std-color-gray-10);
 
   /* Active States */
-  --snowflake-standard-design-state-active-chart: var(--snowflake-standard-design-color-gray-70);
-  --snowflake-standard-design-state-active-chart-dim: var(--snowflake-standard-design-color-gray-20);
+  --sf-std-state-active-chart: var(--sf-std-color-gray-70);
+  --sf-std-state-active-chart-dim: var(--sf-std-color-gray-20);
 
   /* Default States */
-  --snowflake-standard-design-default-text: var(--snowflake-standard-design-color-gray-90);
-  --snowflake-standard-design-default-bg: var(--snowflake-standard-design-color-gray-20);
+  --sf-std-default-text: var(--sf-std-color-gray-90);
+  --sf-std-default-bg: var(--sf-std-color-gray-20);
 
   /* Hovered States */
-  --snowflake-standard-design-state-hovered-text: var(--snowflake-standard-design-color-gray-90);
-  --snowflake-standard-design-state-hovered-bg: var(--snowflake-standard-design-color-gray-30);
+  --sf-std-state-hovered-text: var(--sf-std-color-gray-90);
+  --sf-std-state-hovered-bg: var(--sf-std-color-gray-30);
 
   /* Pressed States */
-  --snowflake-standard-design-state-pressed-text: var(--snowflake-standard-design-color-gray-90);
-  --snowflake-standard-design-state-pressed-bg: var(--snowflake-standard-design-color-gray-40);
+  --sf-std-state-pressed-text: var(--sf-std-color-gray-90);
+  --sf-std-state-pressed-bg: var(--sf-std-color-gray-40);
 
   /* Executed Background */
-  --snowflake-standard-design-executed-bg: var(--snowflake-standard-design-color-blue-05);
+  --sf-std-executed-bg: var(--sf-std-color-blue-05);
 
   /* Errored Background */
-  --snowflake-standard-design-errored-bg: var(--snowflake-standard-design-color-red-30);
+  --sf-std-errored-bg: var(--sf-std-color-red-30);
 
   /* ========== TYPOGRAPHY ========== */
 
   /* Font Families */
-  --snowflake-standard-design-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  --snowflake-standard-design-font-family-mono: 'Apercu Mono Pro', 'Monaco', 'Menlo', 'Courier New', monospace;
+  --sf-std-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --sf-std-font-family-mono: 'Apercu Mono Pro', 'Monaco', 'Menlo', 'Courier New', monospace;
 
   /* Font Weights */
-  --snowflake-standard-design-font-weight-regular: 400;
-  --snowflake-standard-design-font-weight-medium: 500;
-  --snowflake-standard-design-font-weight-semibold: 600;
-  --snowflake-standard-design-font-weight-bold: 700;
+  --sf-std-font-weight-regular: 400;
+  --sf-std-font-weight-medium: 500;
+  --sf-std-font-weight-semibold: 600;
+  --sf-std-font-weight-bold: 700;
 
   /* Font Sizes - Primitive */
-  --snowflake-standard-design-font-size-small: 12px;
-  --snowflake-standard-design-font-size-regular: 14px;
-  --snowflake-standard-design-font-size-large: 16px;
-  --snowflake-standard-design-font-size-xlarge: 20px;
-  --snowflake-standard-design-font-size-xxlarge: 28px;
-  --snowflake-standard-design-font-size-xxxlarge: 40px;
+  --sf-std-font-size-small: 12px;
+  --sf-std-font-size-regular: 14px;
+  --sf-std-font-size-large: 16px;
+  --sf-std-font-size-xlarge: 20px;
+  --sf-std-font-size-xxlarge: 28px;
+  --sf-std-font-size-xxxlarge: 40px;
 
   /* Line Heights */
-  --snowflake-standard-design-line-height-small: 16px;
-  --snowflake-standard-design-line-height-regular: 20px;
-  --snowflake-standard-design-line-height-large: 24px;
-  --snowflake-standard-design-line-height-xlarge: 28px;
-  --snowflake-standard-design-line-height-xxlarge: 36px;
-  --snowflake-standard-design-line-height-xxxlarge: 48px;
+  --sf-std-line-height-small: 16px;
+  --sf-std-line-height-regular: 20px;
+  --sf-std-line-height-large: 24px;
+  --sf-std-line-height-xlarge: 28px;
+  --sf-std-line-height-xxlarge: 36px;
+  --sf-std-line-height-xxxlarge: 48px;
 
   /* ========== SPACING ========== */
 
   /* Base spacing unit: 8px */
-  --snowflake-standard-design-space-1: 4px;   /* 0.5x */
-  --snowflake-standard-design-space-2: 8px;   /* 1x */
-  --snowflake-standard-design-space-3: 12px;  /* 1.5x */
-  --snowflake-standard-design-space-4: 16px;  /* 2x */
-  --snowflake-standard-design-space-5: 20px;  /* 2.5x */
-  --snowflake-standard-design-space-6: 24px;  /* 3x */
-  --snowflake-standard-design-space-7: 28px;  /* 3.5x */
-  --snowflake-standard-design-space-8: 32px;  /* 4x */
-  --snowflake-standard-design-space-10: 40px; /* 5x */
-  --snowflake-standard-design-space-12: 48px; /* 6x */
-  --snowflake-standard-design-space-16: 64px; /* 8x */
+  --sf-std-space-1: 4px;   /* 0.5x */
+  --sf-std-space-2: 8px;   /* 1x */
+  --sf-std-space-3: 12px;  /* 1.5x */
+  --sf-std-space-4: 16px;  /* 2x */
+  --sf-std-space-5: 20px;  /* 2.5x */
+  --sf-std-space-6: 24px;  /* 3x */
+  --sf-std-space-7: 28px;  /* 3.5x */
+  --sf-std-space-8: 32px;  /* 4x */
+  --sf-std-space-10: 40px; /* 5x */
+  --sf-std-space-12: 48px; /* 6x */
+  --sf-std-space-16: 64px; /* 8x */
 
   /* ========== BORDER RADIUS ========== */
 
-  --snowflake-standard-design-radius-small: 3px;
-  --snowflake-standard-design-radius-default: 4px;
-  --snowflake-standard-design-radius-medium: 6px;
-  --snowflake-standard-design-radius-large: 8px;
-  --snowflake-standard-design-radius-xlarge: 12px;
-  --snowflake-standard-design-radius-round: 10px;
-  --snowflake-standard-design-radius-pill: 9999px;
-  --snowflake-standard-design-radius-circle: 50%;
+  --sf-std-radius-small: 3px;
+  --sf-std-radius-default: 4px;
+  --sf-std-radius-medium: 6px;
+  --sf-std-radius-large: 8px;
+  --sf-std-radius-xlarge: 12px;
+  --sf-std-radius-round: 10px;
+  --sf-std-radius-pill: 9999px;
+  --sf-std-radius-circle: 50%;
 
   /* ========== SHADOWS ========== */
 
-  --snowflake-standard-design-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --snowflake-standard-design-shadow-md: 0 1px 3px rgba(0, 0, 0, 0.1);
-  --snowflake-standard-design-shadow-lg: 0 2px 4px rgba(0, 0, 0, 0.08);
-  --snowflake-standard-design-shadow-xl: 0 4px 12px rgba(0, 0, 0, 0.15);
-  --snowflake-standard-design-shadow-2xl: 0 10px 40px rgba(0, 0, 0, 0.3);
+  --sf-std-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --sf-std-shadow-md: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --sf-std-shadow-lg: 0 2px 4px rgba(0, 0, 0, 0.08);
+  --sf-std-shadow-xl: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --sf-std-shadow-2xl: 0 10px 40px rgba(0, 0, 0, 0.3);
 
   /* Focus Shadow */
-  --snowflake-standard-design-shadow-focus: 0 0 0 3px rgba(7, 132, 222, 0.1);
+  --sf-std-shadow-focus: 0 0 0 3px rgba(7, 132, 222, 0.1);
 
   /* ========== TRANSITIONS ========== */
 
-  --snowflake-standard-design-transition-fast: 0.15s ease;
-  --snowflake-standard-design-transition-default: 0.2s ease;
-  --snowflake-standard-design-transition-slow: 0.3s ease;
+  --sf-std-transition-fast: 0.15s ease;
+  --sf-std-transition-default: 0.2s ease;
+  --sf-std-transition-slow: 0.3s ease;
 
   /* ========== Z-INDEX ========== */
 
-  --snowflake-standard-design-z-dropdown: 1000;
-  --snowflake-standard-design-z-sticky: 100;
-  --snowflake-standard-design-z-modal: 10000;
-  --snowflake-standard-design-z-toast: 10001;
-  --snowflake-standard-design-z-tooltip: 10002;
+  --sf-std-z-dropdown: 1000;
+  --sf-std-z-sticky: 100;
+  --sf-std-z-modal: 10000;
+  --sf-std-z-toast: 10001;
+  --sf-std-z-tooltip: 10002;
 }

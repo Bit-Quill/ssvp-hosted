@@ -31,7 +31,10 @@ const SnowflakeAPI = {
       const requestBody = {
         statement: sql,
         timeout: timeout,
-        resultSetMetaData: { format: 'json' }
+        resultSetMetaData: { format: 'json' },
+        parameters: {
+          query_tag: 'semantic_view_excel_plugin'
+        }
       };
 
       if (warehouse || SnowflakeAuth.config.warehouse) {
@@ -520,8 +523,8 @@ const SnowflakeAPI = {
    */
   async getDistinctValues(semanticView, column, limit = QUERY_CONFIG.DEFAULT_DISTINCT_VALUES_LIMIT) {
     try {
-      // First check count
-      const countSql = `SELECT COUNT(DISTINCT ${column}) as cnt FROM ${semanticView}`;
+      // First check count (excluding NULLs)
+      const countSql = `SELECT COUNT(DISTINCT ${column}) as cnt FROM ${semanticView} WHERE ${column} IS NOT NULL`;
       const countResult = await this.executeQuery(countSql);
       const distinctCount = parseInt(countResult.rows[0].cnt, 10);
 
@@ -532,11 +535,12 @@ const SnowflakeAPI = {
         );
       }
 
-      // Get distinct values
-      const sql = `SELECT DISTINCT ${column} FROM ${semanticView} ORDER BY ${column} LIMIT ${limit}`;
+      // Get distinct values (excluding NULLs)
+      const sql = `SELECT DISTINCT ${column} FROM ${semanticView} WHERE ${column} IS NOT NULL ORDER BY ${column} LIMIT ${limit}`;
       const result = await this.executeQuery(sql);
 
-      return result.rows.map(row => row[column]);
+      // Filter out any remaining null/undefined values as a safety measure
+      return result.rows.map(row => row[column]).filter(v => v !== null && v !== undefined);
     } catch (error) {
       throw new Error(`Failed to get distinct values: ${error.message}`);
     }

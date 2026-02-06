@@ -429,13 +429,6 @@ const SnowflakeAPI = {
 
       // If still no fields, log sample objects for debugging
       if (dimensions.length === 0 && metrics.length === 0 && facts.length === 0) {
-        console.warn('No fields parsed. Sample objects:',
-          Array.from(objectsMap.entries()).slice(0, 5).map(([name, obj]) => ({
-            name,
-            kind: obj.kind,
-            properties: obj.properties
-          }))
-        );
       }
 
       // ENHANCEMENT: Enrich dimensions and facts with table names from SHOW commands
@@ -457,7 +450,7 @@ const SnowflakeAPI = {
           }
         });
       } catch (enrichError) {
-        console.warn('⚠️ Failed to enrich metadata with table names:', enrichError.message);
+        console.warn('Failed to enrich metadata with table names:', enrichError.message);
         // Continue without table names - validation will be limited
       }
 
@@ -719,7 +712,6 @@ const SnowflakeAPI = {
         errors: errors
       };
     } catch (error) {
-      console.error('Validation error:', error);
       return {
         valid: true, // Allow query on validation error
         warnings: [{
@@ -988,9 +980,6 @@ const SnowflakeAPI = {
       // Add LIMIT and OFFSET outside the SEMANTIC_VIEW clause
       query += ` LIMIT ${limit} OFFSET ${offset}`;
 
-      console.log('=== GENERATED SQL QUERY ===');
-      console.log(query);
-      console.log('========================');
 
       // Store the query for error handling
       this._lastQuery = query;

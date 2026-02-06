@@ -51,3 +51,8 @@ temp/
 # Documentation (optional - remove if you want to track these)
 CLAUDE.md
 PROJECT_TASKS.md
+
+# Design System Assets (do not commit proprietary design files)
+stellar/
+*.pdf
+design-assets/

@@ -1,11 +1,12 @@
 const express = require('express');
+const fetch = require('node-fetch');
 const router = express.Router();
 
 // SECURITY: Sanitize error responses to prevent information disclosure
 // Logs full error details server-side but returns safe messages to client
 function sanitizeError(error, context = '') {
   // Generate unique error ID for correlation between logs and client errors
-  const errorId = `ERR-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  const errorId = `ERR-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
 
   // Log full error details server-side for debugging
   console.error(`[${errorId}] ${context}:`, {
@@ -192,7 +193,6 @@ router.post('/token', async (req, res) => {
       tokenParams.append('client_secret', 'LOCAL_APPLICATION');
     }
 
-    const fetch = (await import('node-fetch')).default;
     const response = await fetch(tokenUrl, {
       method: 'POST',
       headers: {
@@ -319,7 +319,6 @@ router.post('/refresh', async (req, res) => {
       tokenParams.append('client_secret', finalClientSecret);
     }
 
-    const fetch = (await import('node-fetch')).default;
     const response = await fetch(tokenUrl, {
       method: 'POST',
       headers: {
@@ -436,7 +435,6 @@ router.post('/revoke', async (req, res) => {
       client_secret: clientSecret
     });
 
-    const fetch = (await import('node-fetch')).default;
     await fetch(revokeUrl, {
       method: 'POST',
       headers: {

@@ -1,6 +1,13 @@
 # Build output
 dist/
 build/
+dist-executables/
+
+# Distribution files
+*.zip
+snowflake-excel-server-windows.exe
+snowflake-excel-server-macos
+dist-package/
 
 # Node modules folder
 node_modules/

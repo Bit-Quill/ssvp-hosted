@@ -103,6 +103,11 @@ module.exports = async (env, options) => {
             from: "public-readme.html",
             to: "index.html",
           }] : []),
+          // Copy download page
+          {
+            from: "src/download.html",
+            to: "download.html",
+          },
         ],
       }),
     ],

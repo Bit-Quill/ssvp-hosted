@@ -3,9 +3,10 @@
 const devCerts = require("office-addin-dev-certs");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const webpack = require("webpack");
 
 const urlDev = "https://localhost:3000/";
-const urlProd = "https://www.contoso.com/"; // CHANGE THIS TO YOUR PRODUCTION DEPLOYMENT LOCATION
+const urlProd = "https://bit-quill.github.io/ssvp-hosted/"; // GitHub Pages deployment location
 
 async function getHttpsOptions() {
   const httpsOptions = await devCerts.getHttpsServerOptions();
@@ -60,6 +61,12 @@ module.exports = async (env, options) => {
       ],
     },
     plugins: [
+      new webpack.DefinePlugin({
+        'process.env.NODE_ENV': JSON.stringify(dev ? 'development' : 'production'),
+        'process.env.OAUTH_REDIRECT_URI': JSON.stringify(
+          dev ? 'http://localhost:3000/auth/callback' : 'https://bit-quill.github.io/ssvp-hosted/auth/callback'
+        ),
+      }),
       new HtmlWebpackPlugin({
         filename: "taskpane.html",
         template: "./src/taskpane/taskpane.html",
@@ -80,16 +87,22 @@ module.exports = async (env, options) => {
             to: "auth/[name][ext]",
           },
           {
-            from: "manifest*.xml",
-            to: "[name]" + "[ext]",
+            from: dev ? "manifest.xml" : "manifest.production.xml",
+            to: "manifest.xml",
             transform(content) {
               if (dev) {
                 return content;
               } else {
-                return content.toString().replace(new RegExp(urlDev, "g"), urlProd);
+                // In production, copy manifest.production.xml as manifest.xml
+                return content;
               }
             },
           },
+          // Copy public readme as index.html for GitHub Pages landing page
+          ...(!dev ? [{
+            from: "public-readme.html",
+            to: "index.html",
+          }] : []),
         ],
       }),
     ],

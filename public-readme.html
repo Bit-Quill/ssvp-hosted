@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snowflake Excel Plugin - Installation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .step {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .step h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .url-box {
+            background: #2d3748;
+            color: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+            word-break: break-all;
+            position: relative;
+        }
+
+        .copy-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+            transition: background 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: #5568d3;
+        }
+
+        .copy-btn:active {
+            background: #4c5fc7;
+        }
+
+        .success {
+            background: #48bb78;
+        }
+
+        ol {
+            margin-left: 20px;
+        }
+
+        ol li {
+            margin: 10px 0;
+        }
+
+        .platform {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-right: 10px;
+        }
+
+        .alert {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+        }
+
+        footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            text-align: center;
+            color: #666;
+        }
+
+        a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>❄️ Snowflake Excel Plugin</h1>
+        <p class="subtitle">Connect to Snowflake Semantic Views directly from Microsoft Excel</p>
+
+        <div class="alert alert-success">
+            <strong>✅ Plugin Status:</strong> Active and ready to use!
+        </div>
+
+        <div class="step">
+            <h2>📥 Installation</h2>
+
+            <h3><span class="platform">Windows</span></h3>
+            <ol>
+                <li>Open Microsoft Excel</li>
+                <li>Go to <strong>Insert</strong> tab</li>
+                <li>Click <strong>Get Add-ins</strong> or <strong>My Add-ins</strong></li>
+                <li>Select <strong>Upload My Add-in</strong></li>
+                <li>Copy and paste this URL:</li>
+            </ol>
+
+            <div class="url-box" id="manifestUrl">
+https://bit-quill.github.io/ssvp-hosted/manifest.xml
+            </div>
+            <button class="copy-btn" onclick="copyManifestUrl()">📋 Copy URL</button>
+
+            <h3 style="margin-top: 20px;"><span class="platform">Mac</span></h3>
+            <ol>
+                <li>Open Microsoft Excel</li>
+                <li>Go to <strong>Insert</strong> > <strong>Office Add-ins</strong></li>
+                <li>Click <strong>Upload My Add-in</strong></li>
+                <li>Paste the URL above</li>
+            </ol>
+        </div>
+
+        <div class="step">
+            <h2>🔐 Snowflake Setup (One-time)</h2>
+            <p>Before using the plugin, create an OAuth integration in Snowflake:</p>
+
+            <div class="url-box">
+CREATE SECURITY INTEGRATION my_excel_oauth
+  TYPE = OAUTH
+  ENABLED = TRUE
+  OAUTH_CLIENT = PUBLIC
+  OAUTH_REDIRECT_URI = 'https://bit-quill.github.io/ssvp-hosted/auth/callback'
+  OAUTH_ISSUE_REFRESH_TOKENS = TRUE
+  OAUTH_REFRESH_TOKEN_VALIDITY = 7776000;
+            </div>
+
+            <p style="margin-top: 15px;">Then get your Client ID:</p>
+
+            <div class="url-box">
+DESCRIBE SECURITY INTEGRATION my_excel_oauth;
+            </div>
+
+            <p style="margin-top: 15px;">Copy the <code>OAUTH_CLIENT_ID</code> value - you'll need it to connect!</p>
+        </div>
+
+        <div class="step">
+            <h2>🚀 Usage</h2>
+            <ol>
+                <li>In Excel, click the <strong>Snowflake</strong> button in the Home tab</li>
+                <li>Enter your Snowflake account identifier</li>
+                <li>Enter your OAuth Client ID (from Snowflake setup)</li>
+                <li>Click <strong>Connect with OAuth</strong></li>
+                <li>Authenticate in the Snowflake window</li>
+                <li>Select your Role and Warehouse</li>
+                <li>Start building reports!</li>
+            </ol>
+        </div>
+
+        <div class="alert">
+            <strong>💡 Tip:</strong> Installing via URL means you'll automatically get updates when we release new features!
+        </div>
+
+        <div class="step">
+            <h2>📚 Documentation</h2>
+            <ul style="list-style: none;">
+                <li>📖 <a href="https://github.com/Bit-Quill/ssvp-hosted" target="_blank">Full Documentation</a></li>
+                <li>🐛 <a href="https://github.com/Bit-Quill/ssvp-hosted/issues" target="_blank">Report Issues</a></li>
+                <li>❓ <a href="https://docs.snowflake.com/en/user-guide/oauth-custom" target="_blank">Snowflake OAuth Docs</a></li>
+            </ul>
+        </div>
+
+        <footer>
+            <p>Made with ❤️ for Snowflake users</p>
+            <p style="margin-top: 10px; font-size: 0.9em;">
+                <a href="manifest.xml">Download manifest.xml</a>
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        function copyManifestUrl() {
+            const url = 'https://bit-quill.github.io/ssvp-hosted/manifest.xml';
+            navigator.clipboard.writeText(url).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Copied!';
+                btn.classList.add('success');
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.classList.remove('success');
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>

@@ -43,6 +43,21 @@
                 </small>
             </div>
 
+            <div class="form-group">
+                <label for="oauth-client-id-input">OAuth Client ID (Optional)</label>
+                <input
+                    type="text"
+                    id="oauth-client-id-input"
+                    class="input-field"
+                    placeholder="Leave empty to use LOCAL_APPLICATION"
+                />
+                <small class="help-text">
+                    From your Snowflake Security Integration (public client). Leave blank to use local application flow.
+                    Redirect URI is automatically configured for this deployment.
+                    <a href="https://docs.snowflake.com/en/user-guide/oauth-custom" target="_blank" rel="noopener noreferrer">Learn more</a>
+                </small>
+            </div>
+
             <button type="button" id="btn-connect" class="primary-button">
                 <span id="btn-connect-text">Connect with OAuth</span>
             </button>

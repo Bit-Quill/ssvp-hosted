@@ -40,12 +40,15 @@ const SnowflakeAuth = {
     }
 
     if (!this.config.clientId) {
+      // Default to LOCAL_APPLICATION for simplest setup
       this.config.clientId = 'LOCAL_APPLICATION';
       this.config.integrationName = 'SNOWFLAKE$LOCAL_APPLICATION';
       this.config.redirectUri = 'http://127.0.0.1';
     } else {
+      // For custom OAuth clients, use the configured redirect URI
+      // This is injected at build time by webpack based on deployment environment
       if (!this.config.redirectUri) {
-        this.config.redirectUri = 'http://127.0.0.1:3000/auth/callback';
+        this.config.redirectUri = process.env.OAUTH_REDIRECT_URI || 'http://localhost:3000/auth/callback';
       }
     }
   },
@@ -354,22 +357,31 @@ const SnowflakeAuth = {
 
   async exchangeCodeForTokens(code, codeVerifier) {
     try {
-      const proxyUrl = '/api/auth/token';
+      // For custom OAuth clients (not LOCAL_APPLICATION), call Snowflake directly
+      // This eliminates the need for a backend server
+      const tokenUrl = `https://${this.config.account}.snowflakecomputing.com/oauth/token-request`;
 
-      const requestBody = {
+      const tokenParams = new URLSearchParams({
+        grant_type: 'authorization_code',
         code: code,
-        code_verifier: codeVerifier,
         redirect_uri: this.config.redirectUri,
-        account: this.config.account,
+        code_verifier: codeVerifier,
         client_id: this.config.clientId
-      };
+      });
 
-      const response = await fetch(proxyUrl, {
+      // For LOCAL_APPLICATION, add the client_secret
+      if (this.config.clientId === 'LOCAL_APPLICATION') {
+        tokenParams.append('client_secret', 'LOCAL_APPLICATION');
+      }
+      // For public OAuth clients, no client_secret is needed (PKCE provides security)
+
+      const response = await fetch(tokenUrl, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Accept': 'application/json'
         },
-        body: JSON.stringify(requestBody)
+        body: tokenParams.toString()
       });
 
       let result;
@@ -377,13 +389,12 @@ const SnowflakeAuth = {
         result = await response.json();
       } catch (parseError) {
         const text = await response.text();
-        throw new Error(`Invalid response from proxy: ${text}`);
+        throw new Error(`Invalid response from Snowflake: ${text}`);
       }
 
       if (!response.ok) {
-        const errorMsg = result.message || result.error || 'Token exchange failed';
-        const errorDetails = result.details ? JSON.stringify(result.details) : '';
-        throw new Error(`${errorMsg}${errorDetails ? ' - ' + errorDetails : ''}`);
+        const errorMsg = result.error_description || result.error || 'Token exchange failed';
+        throw new Error(errorMsg);
       }
 
       if (!result.access_token) {
@@ -402,32 +413,50 @@ const SnowflakeAuth = {
     }
 
     try {
-      const response = await fetch('/api/auth/refresh', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          refresh_token: this.refreshToken,
-          account: this.config.account,
-          client_id: this.config.clientId
-        })
+      // Call Snowflake directly - no backend needed
+      const tokenUrl = `https://${this.config.account}.snowflakecomputing.com/oauth/token-request`;
+
+      const tokenParams = new URLSearchParams({
+        grant_type: 'refresh_token',
+        refresh_token: this.refreshToken,
+        client_id: this.config.clientId
       });
 
+      // For LOCAL_APPLICATION, add the client_secret
+      if (this.config.clientId === 'LOCAL_APPLICATION') {
+        tokenParams.append('client_secret', 'LOCAL_APPLICATION');
+      }
+      // For public OAuth clients, no client_secret is needed
+
+      const response = await fetch(tokenUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Accept': 'application/json'
+        },
+        body: tokenParams.toString()
+      });
+
+      let result;
+      try {
+        result = await response.json();
+      } catch (parseError) {
+        const text = await response.text();
+        throw new Error(`Invalid response from Snowflake: ${text}`);
+      }
+
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Token refresh failed');
+        const errorMsg = result.error_description || result.error || 'Token refresh failed';
+        throw new Error(errorMsg);
       }
 
-      const tokens = await response.json();
-
-      this.accessToken = tokens.access_token;
-      if (tokens.refresh_token) {
-        this.refreshToken = tokens.refresh_token;
+      this.accessToken = result.access_token;
+      if (result.refresh_token) {
+        this.refreshToken = result.refresh_token;
       }
-      this.tokenExpiry = Date.now() + (tokens.expires_in * 1000);
+      this.tokenExpiry = Date.now() + (result.expires_in * 1000);
 
-      return tokens;
+      return result;
     } catch (error) {
       this.logout();
       throw new Error(`Token refresh failed: ${error.message}`);

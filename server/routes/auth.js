@@ -191,6 +191,13 @@ router.post('/token', async (req, res) => {
     if (client_id === 'LOCAL_APPLICATION') {
       tokenParams.append('client_secret', 'LOCAL_APPLICATION');
     }
+    // For custom OAuth clients, add client_secret only if configured in environment
+    // This supports both confidential clients (with secret) and public clients (PKCE-only)
+    else if (process.env.SNOWFLAKE_OAUTH_CLIENT_SECRET) {
+      tokenParams.append('client_secret', process.env.SNOWFLAKE_OAUTH_CLIENT_SECRET);
+    }
+    // If no client_secret is provided, this is a public client using PKCE-only flow
+    // which is secure for client-side applications
 
     const fetch = (await import('node-fetch')).default;
     const response = await fetch(tokenUrl, {
@@ -315,9 +322,13 @@ router.post('/refresh', async (req, res) => {
     // For LOCAL_APPLICATION, always add client_secret per Snowflake docs
     if (finalClientId === 'LOCAL_APPLICATION') {
       tokenParams.append('client_secret', 'LOCAL_APPLICATION');
-    } else if (finalClientSecret) {
+    }
+    // For custom OAuth clients, add client_secret only if configured
+    // This supports both confidential clients (with secret) and public clients (PKCE-only)
+    else if (finalClientSecret) {
       tokenParams.append('client_secret', finalClientSecret);
     }
+    // If no client_secret, this is a public client refresh token flow
 
     const fetch = (await import('node-fetch')).default;
     const response = await fetch(tokenUrl, {

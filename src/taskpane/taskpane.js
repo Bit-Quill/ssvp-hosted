@@ -286,6 +286,7 @@ async function checkExistingSession() {
 
 async function handleConnect() {
   const account = document.getElementById('account-input').value.trim();
+  const clientId = document.getElementById('oauth-client-id-input').value.trim();
 
   if (!account) {
     showError('Please enter your Snowflake account identifier');
@@ -296,6 +297,13 @@ async function handleConnect() {
     showLoading('Initializing authentication...');
 
     const initConfig = { account };
+
+    // Add custom OAuth client ID if provided
+    // Redirect URI is handled automatically by SnowflakeAuth
+    if (clientId) {
+      initConfig.clientId = clientId;
+    }
+
     SnowflakeAuth.init(initConfig);
 
     // OAuth authentication

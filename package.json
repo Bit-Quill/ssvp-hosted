@@ -15,6 +15,7 @@
   "scripts": {
     "build": "webpack --mode production",
     "build:dev": "webpack --mode development",
+    "build:prod": "webpack --mode production",
     "dev-server": "webpack serve --mode development",
     "dev": "webpack serve --mode development",
     "server": "node server/server.js",
@@ -31,7 +32,9 @@
     "sideload": "office-addin-debugging start manifest.xml",
     "validate": "office-addin-manifest validate manifest.xml",
     "generate-certs": "office-addin-dev-certs install",
-    "watch": "webpack --mode development --watch"
+    "watch": "webpack --mode development --watch",
+    "deploy": "npm run build:prod && git add . && git status",
+    "deploy:help": "echo '\n🚀 Simple Deployment:\n\n1. npm run build:prod\n2. git add .\n3. git commit -m \"Deploy\"\n4. git push origin main\n\n✅ GitHub Actions despliega automáticamente a:\nhttps://bit-quill.github.io/ssvp-hosted/\n\n📖 Más info: cat STATIC_DEPLOYMENT.md\n'"
   },
   "dependencies": {
     "core-js": "^3.36.0",

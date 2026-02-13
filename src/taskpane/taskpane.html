@@ -44,17 +44,18 @@
             </div>
 
             <div class="form-group">
-                <label for="oauth-client-id-input">OAuth Client ID (Optional)</label>
+                <label for="oauth-client-id-input">OAuth Client ID <span style="color: #e53e3e;">(Required for hosted deployment)</span></label>
                 <input
                     type="text"
                     id="oauth-client-id-input"
                     class="input-field"
-                    placeholder="Leave empty to use LOCAL_APPLICATION"
+                    placeholder="e.g., 12aBcDEfgHiJKLmnOPqrStUVwX=="
                 />
                 <small class="help-text">
-                    From your Snowflake Security Integration (public client). Leave blank to use local application flow.
-                    Redirect URI is automatically configured for this deployment.
-                    <a href="https://docs.snowflake.com/en/user-guide/oauth-custom" target="_blank" rel="noopener noreferrer">Learn more</a>
+                    <strong>Required for this deployment.</strong> Create a Security Integration in Snowflake with redirect URI:
+                    <code style="font-size: 10px;">https://bit-quill.github.io/ssvp-hosted/auth/callback</code>
+                    <br>
+                    <a href="https://docs.snowflake.com/en/user-guide/oauth-custom" target="_blank" rel="noopener noreferrer">Setup instructions</a>
                 </small>
             </div>
 

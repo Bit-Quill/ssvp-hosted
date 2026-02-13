@@ -39,6 +39,9 @@ jobs:
         env:
           NODE_ENV: production
 
+      - name: Copy production manifest
+        run: cp manifest.production.xml dist/manifest.xml
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
